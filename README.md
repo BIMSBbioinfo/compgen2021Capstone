@@ -11,8 +11,9 @@ The datasets for the course can be accessed here:
 Every dataset is split into two separate directories:
 -      .../all_intersect_genes/
 -      .../oncoKB_intersect_genes/
-
 The former contains omic data for all genes shared across datasets and the latter composed of gene present in oncoKB cancer panel.
+
+
 -----
 Subsequently, each folder contains the following data: 
 
