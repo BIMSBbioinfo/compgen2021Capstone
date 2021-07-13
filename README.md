@@ -5,7 +5,7 @@
 ## Data
 The datasets for the course can be accessed here:
 ```
-/data/bimsbstatic/public/akalin/AAkalin_DrugResponse/prepared
+https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_DrugResponse/prepared/index2.html
 ```
 
 Every dataset is split into two separate directories:
