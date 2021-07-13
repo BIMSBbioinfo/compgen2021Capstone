@@ -4,9 +4,10 @@
 
 ## Data
 The datasets for the course can acessed here:
-'''
+```
 /data/bimsbstatic/public/akalin/AAkalin_DrugResponse/prepared
-'''
+```
+
 Every dataset is split into two separate directories:
 -      .../all_intersect_genes/
 -      .../oncoKB_intersect_genes/
