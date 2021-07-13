@@ -2,17 +2,18 @@
 
 
 
-## gex.tsv:
+## Data
+### gex.tsv:
         info: gene expression measurements
         shape: fat
         values: log10 FPKM + 0.01
 
-cnv.tsv:
+### cnv.tsv:
         info: copy number variation estimations
         shape: fat
         values: binarized
 
-mut.tsv:
+### mut.tsv:
         info: mutation data
         shape: tall
         sample_column_name: sample_id
@@ -20,7 +21,7 @@ mut.tsv:
                 - Feature
                 - protein_change
 
-drug_response.tsv:
+### drug_response.tsv:
         info: drug response data
         shape: tall
         values: AUC
