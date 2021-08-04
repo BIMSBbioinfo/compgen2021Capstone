@@ -1,0 +1,1270 @@
+---
+title: 'CompGen2021: The Capstone Project'
+author: Altuna Akalin,Vedran Franke,Bora Uyar,Jan Dohmen,Artem Baranovsky,İrem Begüm Gündüz
+Date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+    code_folding: hide
+    theme: journal
+    highlight: haddock
+    citation_package: natbib
+bibliography: /Users/ibgun/Desktop/compgen2021Capstone/references.bib
+biblio-style: apalike
+link-citations: yes
+always_allow_html: yes
+---
+
+```{r setup, warning=FALSE, message=FALSE, echo=FALSE, include=FALSE}
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::knit_hooks$set(optipng = knitr::hook_optipng)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, 
+                      cache = TRUE, optipng='', cache.lazy = FALSE,
+                      echo = TRUE)
+
+suppressMessages(library("tidyverse"))
+suppressMessages(library("ggplot2"))
+suppressMessages(library("maftools"))
+suppressMessages(library("RColorBrewer"))
+suppressMessages(library("plotly"))
+```
+
+***
+
+Welcome to the capstone project of the Computational Genomics Course for
+Hands-on Data Analysis 2021: Machine Learning for Genomics!
+
+This course is designed to teach the application of machine learning in genomics
+statistically and conceptually. You can find more information about the course
+on the course [page.](https://compgen.mdc-berlin.de/) To access the the Github
+repository of the course click
+[here.](https://github.com/BIMSBbioinfo/compgen2021) You can also access the
+Github repository of the capstone project from
+[here.](https://github.com/BIMSBbioinfo/compgen2021Capstone)
+
+The capstone project tasks are designed using data from a real world problem.
+The participants who provide the best reports for the capstone projects will be
+invited to co-author a manuscript with the Akalin lab.
+
+The following page contains the tasks and all of the necessary information to
+start the capstone project. Please provide documented code and figures for the
+problems below in PDF format.
+
+***
+
+## 1. Quick Start 
+
+All data can be accessed at
+[here.](https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_DrugResponse/prepared/index2.html)
+
+* You can download the data by using Linux/Ubuntu command window as well. To
+download the data, copy the link of the file from the HTML file provided to you
+and just type `wget link`.
+
+* For example: `wget https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_DrugResponse/prepared/AAkalin_DrugResponse-prepared.tar.gz`. Typing this command will download the entire data folder.If you're having any issues on wget command, you can get more information from the link [here.](https://linuxize.com/post/wget-command-examples/#installing-wget)
+
+* Another example: You can download the data with wget and assign a specific name by typing `wget -O CCLE_gex.zip https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_DrugResponse/prepared/CCLE/all_intersect_genes/gex.tsv.gz`. Typing this command will download the gene expression data from the CCLE with a specific name CCLE_gex.
+
+* Once you download the data, you need to unzip it.You can use `gunzip()`
+function to unzip the file with **.gz** extension. Additionally, you may also
+need to use `R.utils::untar()` function to untar the **.tar**  files. All of the
+data is in **.tsv** format. There is no significantly difference between the
+**.csv** and **.tsv** format, so you can simply read **.tsv** by specifying `sep
+= '\t'`, or by using `read.delim()` function.
+
+* For example: `read.delim(R.utils::gunzip("data/CCLE/drug_response/TRAMETINIB.tsv.gz"))` and you can assign the data you read to a variable.
+
+From the code below, you can see how the PCA graph of gene expression is plotted by coloring it based on the drug.
+
+```{r Quickstart}
+#read the gene exp data
+CCLE_gex <- read.delim("data/CCLE/all_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+# with the dimension of 1305 x 18356
+
+#read the drug response data
+drug_resp_CCLE <- read.delim("data/CCLE/drug_response/ALPELISIB.tsv") %>%
+    dplyr::bind_rows(read.delim("data/CCLE/drug_response/BUPARLISIB.tsv")) %>%
+    dplyr::bind_rows(read.delim("data/CCLE/drug_response/CETUXIMAB.tsv")) %>%
+    dplyr::bind_rows(read.delim("data/CCLE/drug_response/ERLOTINIB.tsv")) %>%
+    dplyr::bind_rows(read.delim("data/CCLE/drug_response/RIBOCICLIB.tsv")) %>%
+    dplyr::bind_rows(read.delim("data/CCLE/drug_response/TRAMETINIB.tsv")) %>%
+    rename(drug = column_name, cell_lines = sample_id)
+#with the dimension of 4190 x 5
+
+#Remove near zero variation 
+nzv <- caret::preProcess(CCLE_gex,method="nzv",uniqueCut = 15)
+CCLE_gex_pp <- predict(nzv,CCLE_gex)
+#with the dimension of 3045 x 16023
+
+#center scale and pca
+preprocessParams  <- caret::preProcess(CCLE_gex_pp,method=c("pca"))
+CCLE_gex_pp <- predict(preprocessParams,CCLE_gex_pp)
+
+#combine the drug response values
+ccle_data <- dplyr::inner_join(drug_resp_CCLE, CCLE_gex_pp, by = "cell_lines") %>%
+  select(!data_type  & !variable_type)
+#with the dimension of 3045 x 18358
+
+#Save the plots
+ALPpcaplot <- ccle_data %>% filter(drug == "ALPELISIB") %>%
+  ggplot(aes(x=PC1,y=PC2))+
+  geom_point(aes(color =value))+
+  ggtitle("ALPELISIB")+
+  theme(legend.position = "right")+
+  scale_color_gradient(low = "orange", high = "Blue")
+
+BUPpcaplot <- ccle_data %>% filter(drug == "BUPARLISIB") %>%
+  ggplot(aes(x=PC1,y=PC2))+
+  geom_point(aes(color =value))+
+  ggtitle("BUPARLISIB")+
+  theme(legend.position = "right")+
+  scale_color_gradient(low = "orange", high = "Blue")
+    
+CETpcaplot <- ccle_data %>% filter(drug == "CETUXIMAB") %>%
+  ggplot(aes(x=PC1,y=PC2))+
+  geom_point(aes(color =value))+
+  ggtitle("CETUXIMAB")+
+  theme(legend.position = "right")+
+  scale_color_gradient(low = "orange", high = "Blue")
+
+ERLpcaplot <- ccle_data %>% filter(drug == "ERLOTINIB") %>%
+  ggplot(aes(x=PC1,y=PC2))+
+  geom_point(aes(color =value))+
+  ggtitle("ERLOTINIB")+
+  theme(legend.position = "right")+
+  scale_color_gradient(low = "orange", high = "Blue")
+
+RIBpcaplot <- ccle_data %>% filter(drug == "RIBOCICLIB") %>%
+  ggplot(aes(x=PC1,y=PC2))+
+  geom_point(aes(color =value))+
+  ggtitle("RIBOCICLIB")+
+  theme(legend.position = "right")+
+  scale_color_gradient(low = "orange", high = "Blue")
+
+TRApcaplot <- ccle_data %>% filter(drug == "TRAMETINIB") %>%
+  ggplot(aes(x=PC1,y=PC2))+
+  geom_point(aes(color =value))+
+  ggtitle("TRAMETINIB")+
+  theme(legend.position = "right")+
+  scale_color_gradient(low = "orange", high = "Blue")
+
+cowplot::plot_grid(ALPpcaplot,BUPpcaplot,CETpcaplot,ERLpcaplot,RIBpcaplot,TRApcaplot)
+```
+
+***
+
+## 2. Get to Know Your Data
+
+* There are four main sections in the data file, which are **CCLE**,
+**PDX_ALL**, **GDSC_broad** and **GDSC_sanger**. Each of these main folders
+contains three subfolders, as indicated in the `README` file as well. The
+`all_intersect_genes` folder contains all of the genomic data which are the
+predictive features that we will be using in our machine learning model. The
+`drug_response` folder contains the drug response data which is the continuous
+response variable that we will a training model to predict. There is six
+different drug response data present within the `drug_response` folder.
+
+* `The Cancer Cell Line Encyclopedia (CCLE)` project is an effort to conduct a
+detailed genetic characterization of a large panel of human cancer cell
+lines.`The CCLE` is an independent dataset produced by the BROAD institute. The
+CCLE provides public access to genomic data, visualization, and analysis for
+over 1100 cancer cell lines. You can get more info on `the CCLE` from
+[here.](https://sites.broadinstitute.org/ccle/) @Ghandi
+
+* `Genomics of Drug Sensitivity in Cancer (GDSC)` is the largest public resource
+database for information on drug sensitivity in cancer cells and molecular
+markers of drug response. Data are freely available without restriction. GDSC
+currently contains drug sensitivity data for more than 75,000 experiments,
+describing the response to 138 anticancer drugs across more than 700 cancer cell
+lines. You can get more info on `the GDSC` from
+[here.](https://academic.oup.com/nar/article/41/D1/D955/1059448) @Yang
+
+* `Genomics of Drug Sensitivity in Cancer (GDSC)` consists of two batches:
+  1. BROAD half of cell lines sequenced in Broad, from BROAD cell line library, which you can find in `GDSC_BROAD` data folder.
+  2. SANGER half of cell lines sequences in Sanger from the SANGER cell line library which you can find in `GDSC_SANGER` data folder.
+
+**NOTE : **  Even though they might have overlapped cell lines,`GDSC_BROAD`
+and `CCLE` are completely different datasets.
+
+* The data within `The CCLE` and `The GDSC` databases can be considered as kinds
+of `CMA` data which stands for `Cell-Line Microrray`. `CMAs` are the tumor
+samples that are grown in the lab environment. `CMAs`are poor representations of
+actual tumors despite using so widely in researches. The reason for this is the
+way `CMAs` are produced.
+
+* When a biopsy sample is taken from a patient, this sample is injected into
+mice in the lab. After the tumor develops again on mice, it is taken from the
+mouse and divided into slices ,and cultured. Tumors are solid structures that
+consist of cells that are completely focused on division. The difference between
+`CMA` and tumor structures because only from the growth and division of cells
+located on the outside of the plate. The most important reason for this is that
+the cells in the internal structure of the tumor have limited access to oxygen.
+As a result, `CMA` is extremely useful in cancer research, but does not fully
+represent tumor cell structure.
+
+* `PDX`, on the other hand, represents the tumor structure better than `CMAs`.
+So don't be surprised if you obtain different results on `PDX` data. `PDX`
+stands for `Patient-Derived Xenograft`. `PDX` is the re-creation of a tumor
+sample is taken by biopsy from the patient by injecting it into mice. We use the
+`PDX` data to obtain more meaningful results clinically. In Figure 1 below you
+can see the overall representation for using `PDX` to test drug efficacy.
+@Jung2017 And the cell cultivation methodologies are represented in Figure 2.
+@Cho2016 @Ravi2016
+
+
+```{r figures,fig.show="hold", out.width="45%"}
+knitr::include_graphics(c("https://www.researchgate.net/publication/292953008/figure/fig1/AS:565678451027968@1511879660297/Generation-of-PDX-models-Surgical-specimens-from-cancer-patients-are-divided-into-small.png","https://kosheeka.com/wp-content/uploads/2020/07/tumor-primary-cultures.jpg"))
+```
+
+ 
+***
+
+* The `Gene expression` measurement is usually achieved by quantifying levels of
+the gene product, which is often a protein. Two common techniques used for
+protein quantification include Western blotting and enzyme-linked immunosorbent
+assay or ELISA.Cancer can be described as a disease of altered gene expression.
+There are many proteins that are turned on or off (gene activation or gene
+silencing) that dramatically alter the overall activity of the cell. A gene that
+is not normally expressed in that cell can be switched on and expressed at high
+levels.
+
+* **NOTE ** that the gene expression data was transformed. (values: log10 FPKM +
+0.01)
+
+***
+
+* `CNV` stands for **Copy Number of Variation**. A `CNV` is when the number of
+copies of a particular gene vary from one individual to the next. The extent to
+which copy number variation contributes to human disease is not yet known. It
+has long been recognized that some cancers are associated with elevated copy
+numbers of particular genes.For more information you can click the link
+[here.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2697494/)
+
+* You'll notice that `the CNV` data within the folders consists of zeros (0), ones (1) and minus ones (-1).
+    1. Genes with focal CNV values smaller than -0.3 are categorized as a "loss" (-1)
+    2. Genes with focal CNV values larger than 0.3 are categorized as a "gain" (+1)
+    3. Genes with focal CNV values between and including -0.3 and 0.3 are categorized as "neutral" (0).
+
+***
+
+* A `mutation` is a change. It creates an abnormal protein. Or it may prevent a
+protein's formation. An abnormal protein provides different information than a
+normal protein. This can cause cells to multiply uncontrollably and become
+cancerous. For more information on variant calling comparison between `the CCLE`
+and `the GDSC` link is
+[here.](https://www.researchgate.net/figure/CCLE-variant-calling-pipeline-and-CCLE-and-GDSC-comparison-a-Unified-pipeline_fig4_332961554)
+
+***
+
+* `Drug response` data indicates the drug efficacy in cell lines. They are
+widely used in cancer research to prioritize drugs to be tested in patients.
+You'll notice the metric of the drug response is AUC. In pharmacology, the area
+under the plot of plasma concentration of a drug versus time after dosage
+(called “area under the curve” or AUC) gives insight into the extent of exposure
+to a drug and its clearance rate from the body. AUC combines information about
+drug efficacy and potency into a single value, and it was reported to be the
+most robust metric previously. To learn more on response metrics click this
+[link](https://www.nature.com/articles/s41598-020-59656-2#:~:text=Having%20compared%20three%20drug%20response,most%20robust%20metric%20previously37.)
+
+***
+
+## 3. The Capstone Project: PART I Tasks
+
+Your tasks include:
+
+1. Train machine learning models to predict drug response on cell lines. Use one
+of the datasets to train a model and use other data set to validate the models.
+
+* Explain your model; what are your observations? How good the accuracy of your
+model to predict drug response when you train a a model with one data set,and
+validate to another? Do you have a good validation? accuracy on the other one?
+* **HINT:** You have large numbers of feature data and, you can use which
+one you'd like. But, not all of the features are informative considering the the
+largeness of your feature data sets. In fact, there may be the possibility of
+collinearity within the feature data sets, which may decrease the accuracy of
+your model. You will need to jointly normalize the datasets together to be able to use them in training and validation. You may also need to remove non-informative
+features before training.
+
+2. Take the best or the combination of models you created for cell lines and
+predict drug response on `the PDX data set`. Plot metrics for each drug.
+
+* Which accuracy metric can you use for that purpose?
+* **HINT :** You may use Pearson Correlation and,the Spearman Correlation.
+Again, you will probably need to jointly normalize data sets to be able to use
+them in training and validation.
+
+* **IMPORTANT NOTE 1:** you should do cross-validation accuracy estimates when
+training your final/best model.
+* **IMPORTANT NOTE 2:** `the PDX data set` is for `validation` **ONLY** and it
+shouldn't be used for training the model.
+
+3. You may have noticed that some ` PDX validation `results are very different
+compared to cell lines or cross-validation on cell lines. This could be due to
+many different things, can you identify and remedy this problem? Show
+improvement on your previous PDX validation accuracy by employing your proposed
+solution.
+
+* **HINT :** Consider the batch effects between different datasets.
+
+***
+
+## 4. Summary of Data to be Used in Part I Tasks 
+
+Below are all the necessary summary statistics about the data you will use to
+complete tasks. A summary of drug response data is given at the end of the
+document.
+
+### The CCLE Data {.tabset}
+
+#### Gene Expression Data from the CCLE
+
+The dimension of the gene expression data is **1305 x 18357**. There are also no
+missing values present within the dataset. Since the dimensions of the data was
+high, only the first fifthy columns were analyzed statistically.
+
+```{r CCLE_data statistics1}
+#read the data
+CCLE_gex <- read.delim("data/CCLE/all_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(CCLE_gex[,2:50]),xlab="Gene Expression values",
+     main="The CCLE Gene Expression ",border="white",
+     col="cornflowerblue",bins = 50)
+#Plot the boxplots for the Gene Expression values of the first 50 columns
+ boxplot(CCLE_gex[,2:50],outline=FALSE, col="cornflowerblue",
+        xlab = "Gene Expression values",xaxt="n",
+        ylab = "Frequency",main = "The CCLE Gene Expression")
+
+```
+
+```{r CCLE_gex NAs,eval=FALSE}
+#check the missing values of the data set
+CCLE_gex[CCLE_gex == "NA"] <- NA
+table(is.na(CCLE_gex)) #FALSE:23954580  
+#There are no missing values
+```
+
+####  CNV Data from the CCLE
+
+There are no missing values present. Heatmap of the `CNV` data was plotted. The
+dimension of the CNV data is **1745 x 18356 **.
+
+```{r CCLE_data statistics2}
+#read the data
+CCLE_cnv <- read.delim("data/CCLE/all_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+cols <- colorRampPalette(brewer.pal(6,name="Blues"))(12)
+
+pheatmap::pheatmap(CCLE_cnv[,2:50],cluster_rows=FALSE,show_rownames = FALSE,main="Copy Number Data from the CCLE",color = cols)
+```
+
+```{r CCLE_cnv NAs ,eval=FALSE}
+#check the missing values of the data set
+CCLE_cnv[CCLE_cnv == "NA"] <- NA
+table(is.na(CCLE_cnv)) #FALSE:32031220   
+#There are no missing values
+```
+
+#### Mutation Data from the CCLE
+
+Below, the variant classification, top 10 mutated genes, variants per sample
+plots were plotted.
+
+**NOTE :** The`CCLE` mutation data contain missing values, so you have to deal
+with them in order to use.
+
+```{r CCLE_mut statistics3}
+CCLE_mutdelim <- read.delim(file = "data/CCLE/all_intersect_genes/mut.tsv", 
+                               sep = "\t", header = TRUE, fill = TRUE,
+                            comment.char = "#") #read the mutation data 
+
+CCLE_mutdelim$Tumor_Seq_Allele2 <- CCLE_mutdelim$Tumor_Seq_Allele1
+CCLE_mut <- read.maf(maf= CCLE_mutdelim) #to convert and read it as maf file
+
+#Plot the summary of mutation data 
+plotmafSummary(maf = CCLE_mut, rmOutlier = TRUE, addStat = 'median',
+               dashboard = TRUE,titvRaw = FALSE)
+```
+
+
+```{r CCLE_mut NAs ,eval=FALSE}
+#check the missing values of the data set
+CCLE_mutdelim[CCLE_mutdelim == "NA"] <- NA
+table(is.na(CCLE_mutdelim)) #FALSE: 43439347 , TRUE: 886853 
+#There are missing values
+```
+
+
+### The GDSC BROAD Data {.tabset}
+
+#### Gene Expression Data from the GDSC BROAD
+
+A histogram and a bar plot were plotted for representing the frequency of the
+gene expression of `the GDSC BROAD` dataset. There are no missing values within
+the dataset. Check the distribution of data. The dimensions of the gene
+expression data is **613 x 18356**.
+
+```{r BROAD_gex statistics1}
+#read the data
+BROAD_gex <- read.delim("data/GDSC_broad/all_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(BROAD_gex[,2:50]),xlab="Gene Expression values",
+     main="The GDSC BROAD Histogram ",border="white",
+     col="Green",bins = 50)
+#Plot the boxplots for the Gene Expression values of the first 50 columns
+ boxplot(BROAD_gex[,2:50],outline=FALSE, col="Green",
+        xlab = "Gene Expression values",xaxt="n",
+        ylab = "Frequency",main = "The GDSC BROAD BoxPlot")
+
+```
+
+
+```{r BROAD_gex NAs,eval=FALSE}
+#check the missing values of the data set
+BROAD_gex[BROAD_gex == "NA"] <- NA
+table(is.na(BROAD_gex)) #FALSE:11252228   
+#There are no missing values
+```
+
+
+#### CNV Data from the GDSC BROAD
+
+heatmap of the CNV data was plotted. There are no missing values present within
+the dataset.The dimensions of the CNV data is **891 x 18356**.
+
+```{r GDSC_data statistics2}
+#read the data
+BROAD_cnv <- read.delim("data/GDSC_broad/all_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+cols <- colorRampPalette(brewer.pal(6,name="Greens"))(12)
+
+pheatmap::pheatmap(BROAD_cnv[,2:50],cluster_rows=FALSE,show_rownames = FALSE,
+                   main="Copy Number Data from the GDSC BROAD",col = cols)
+```
+
+```{r BROAD_cnv NAs,eval=FALSE}
+#check the missing values of the data set
+BROAD_cnv[BROAD_cnv == "NA"] <- NA
+table(is.na(BROAD_cnv)) #FALSE:11252228   
+#There are no missing values
+```
+
+#### Mutation Data from the GDSC BROAD
+
+The frequency of each variant type and, top 10 mutated genes were plotted.
+
+**NOTE :** There are missing values present within the data.
+```{r GDSC_mut statistics3}
+BROAD_mutdelim <- data.table::fread(
+  file = "data/GDSC_broad/all_intersect_genes/mut.tsv",sep = "\t", 
+  header = TRUE, fill = TRUE) #read the mutation data
+
+genesum <- maftools::getGeneSummary(MAF(BROAD_mutdelim)) %>% group_by(Hugo_Symbol) %>% select(Hugo_Symbol,AlteredSamples) %>%
+  arrange() %>% head(10)
+
+Variant_Type <- BROAD_mutdelim %>% group_by(Variant_Type) %>%
+count() %>% rename(frequency = n)
+
+var_plot <- ggplot(data=Variant_Type, aes(x=Variant_Type, y = frequency, fill=Variant_Type))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Variant Type") +
+  ylab("Frequency") +
+  xlab("Variant Type")
+
+ggplot(data=genesum, aes(x=reorder(Hugo_Symbol, AlteredSamples), y = AlteredSamples, fill = AlteredSamples))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Top 10 Mutated Genes Based on Altered Samples") +
+  ylab("Number of Altered Samples") +
+  xlab("Gene Names")+
+  theme(legend.position = "right")
+
+ggplotly(var_plot)
+```
+
+```{r GDSC_mut NAs ,eval=FALSE}
+#check the missing values of the data set
+BROAD_mutdelim[BROAD_mutdelim == "NA"] <- NA
+table(is.na(BROAD_mutdelim)) #FALSE: 22905359  , TRUE: 24115732  
+#There are missing values
+```
+
+
+###  The GDSC SANGER Data {.tabset}
+
+#### Gene Expression Data from the GDSC SANGER
+
+A histogram and a boxplot were plotted to represent the expression values of the
+first fifty genes. There are no missing values present within the dataset. Check
+the distribution of the gene expression values. The dimensions of the gene
+expression data is **384 x 18356**.
+
+```{r SANGER_data statistics1}
+#read the data
+SANGER_gex <- read.delim("data/GDSC_sanger/all_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(SANGER_gex[,2:50]),xlab="Gene Expression values",
+     main="The GDSC SANGER Histogram ",border="white",
+     col="Orange",bins = 50)
+#Plot the boxplots for the Gene Expression values of the first 50 columns
+ boxplot(SANGER_gex[,2:50],outline=FALSE, col="Orange",
+        xlab = "Gene Expression values",xaxt="n",
+        ylab = "Frequency",main = "The GDSC SANGER BoxPlot")
+
+```
+
+```{r SANGER_gex NAs,eval=FALSE}
+#check the missing values of the data set
+SANGER_gex[SANGER_gex == "NA"] <- NA
+table(is.na(SANGER_gex)) #FALSE:7048704   
+#There are no missing values
+```
+
+#### CNV Data from the GDSC SANGER
+
+Heatmap of the CNV data was plotted. There are no missing values present within
+the dataset. The dimensions of the CNV data is **891 x 18356**.
+
+```{r SANGER_data statistics2}
+#read the data
+SANGER_cnv <- read.delim("data/GDSC_sanger/all_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+cols <- colorRampPalette(brewer.pal(6,name="Oranges"))(12)
+
+pheatmap::pheatmap(SANGER_cnv[,2:50],cluster_rows=FALSE,show_rownames = FALSE,
+                     main="Copy Number Data from the GDSC SANGER", col=cols)
+```
+
+```{r SANGER_cnv NAs ,eval=FALSE}
+#check the missing values of the data set
+SANGER_cnv[SANGER_cnv == "NA"] <- NA
+table(is.na(SANGER_cnv)) #FALSE:16355196    
+#There are no missing values
+```
+
+#### Mutation Data from the GDSC SANGER
+
+The frequency of each variant type and, top 10 mutated genes were plotted.
+
+**NOTE :** There are missing values present in the mutation data.
+
+```{r SANGER_mut statistics3}
+SANGER_mutdelim <-data.table::fread(
+  file = "data/GDSC_sanger/all_intersect_genes/mut.tsv",sep = "\t", 
+  header = TRUE, fill = TRUE)#read the mutation data 
+
+genesum <- maftools::getGeneSummary(MAF(SANGER_mutdelim)) %>%
+  group_by(Hugo_Symbol) %>% select(Hugo_Symbol,AlteredSamples) %>% arrange() %>%
+  head(10)
+
+Variant_Type <- SANGER_mutdelim %>% group_by(Variant_Type) %>% count() %>%
+  rename(frequency = n)
+
+var_plot <- ggplot(data=Variant_Type, aes(x=Variant_Type, 
+                                          y = frequency, fill=Variant_Type))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Variant Type") +
+  ylab("Frequency") +
+  xlab("Variant Type")
+
+ggplot(data=genesum, aes(x=reorder(Hugo_Symbol, AlteredSamples), y = AlteredSamples, fill = AlteredSamples))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Top 10 Mutated Genes Based on Altered Samples") +
+  ylab("Number of Altered Samples") +
+  xlab("Gene Names")+
+  theme(legend.position = "right")
+
+ggplotly(var_plot)
+```
+
+```{r SANGER_mut NAs ,eval=FALSE}
+#check the missing values of the data set
+SANGER_mutdelim[SANGER_mutdelim == "NA"] <- NA
+table(is.na(SANGER_mutdelim)) #FALSE: 24111028   , TRUE: 24115732   
+#There are missing values
+```
+
+### The PDX Data {.tabset}
+
+#### Gene Expression Data from the PDX
+
+There are no missing values present within the `PDX_all` data set. Check the
+distribution of gene expression. How does it differ from the distribution of
+gene expression values in other datasets? The dimension of the gene expression
+data is **399 x 18356**.
+
+```{r PDX_gex statistics1}
+#read the data
+PDX_gex <- read.delim("data/PDX_all/all_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(PDX_gex[,2:50]),xlab="The PDX Dataset",
+     main="The PDX Gene Expression ",border="white",
+     col="Purple")
+
+#Plot the boxplots for the Gene Expression values of the first 50 column
+PDX_gex[,2:50] %>% boxplot(names = FALSE,outline=FALSE, col="Purple",
+                           xlab = "Gene Expression values",ylim = c(0,400),
+                           ylab = "Frequency",main = "The PDX Gene Expression")
+```
+
+
+```{r PDX_gex NAs,eval=FALSE}
+#check the missing values of the data set
+PDX_gex[PDX_gex == "NA"] <- NA
+table(is.na(PDX_gex)) #FALSE:23954580   
+#There are no missing values
+```
+
+#### CNV Data from the PDX
+
+There are no missing values present. Heatmap of the CNV data was plotted. The
+dimension of the CNV data is **399 x 18356**.
+
+```{r PDX_data statistics2}
+#read the data
+PDX_cnv <- read.delim("data/PDX_all/all_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+cols <- colorRampPalette(brewer.pal(6,name="Purples"))(12)
+pheatmap::pheatmap(PDX_cnv[,2:50],cluster_rows=FALSE,show_rownames = FALSE,
+                     main="Copy Number Data from the PDX",color = cols)
+```
+
+
+```{r PDX_cnv NAs ,eval=FALSE}
+#check the missing values of the data set
+PDX_cnv[PDX_cnv == "NA"] <- NA
+table(is.na(PDX_cnv)) #FALSE:16355196     
+#There are no missing values
+```
+
+#### Mutation Data from the PDX
+
+There are missing values present in the mutation data. The histogram of the
+mutation frequency values were plotted.
+
+```{r PDX_mut statistics3}
+PDX_mutdelim <- read.delim(file = "data/PDX_all/all_intersect_genes/mut.tsv", 
+                               sep = "\t", header = TRUE, fill = TRUE,
+                            comment.char = "#") #read the mutation data 
+
+hist(unlist(PDX_mutdelim[,84]),xlab="Mutation Values",
+     main="The PDX Mutation Frequency",border="white",
+     col="Purple",bins = 10)
+
+```
+
+```{r PDX_mutdelim NAs ,eval=FALSE}
+#check the missing values of the data set
+PDX_mutdelim[PDX_mutdelim == "NA"] <- NA
+table(is.na(PDX_mutdelim)) #FALSE: 806164 , TRUE: 8432975    
+#There are missing values
+```
+
+***
+
+## 5. The Capstone Project: PART II Tasks
+
+If you ever look into the data folders, you may have noticed there is
+one more folder `oncoKB_intersect_genes`. This folder contains the panel
+sequencing data, which you will be using for part 2 tasks. Part 2 tasks are the
+same with Part 1 tasks, but you will be using panel sequencing data. In
+addition, you will be using the same drug response data that you used in the
+Part 1 tasks. There we would see if panel-sequencing works as well as
+multi-omics in terms of modeling drug response. 
+
+Your tasks include:
+
+1. Train machine learning models to predict drug response on cell lines. Use one
+of the datasets to train a model and use other data set to validate the models.
+
+* Explain your model, what are your observations? How good the accuracy of your
+model to predict drug response when you train a model with one data set, and
+validate to another? Do you have a good validation accuracy on the other one?
+* **HINT :** You have large numbers of feature data and, you can use which one
+you'd like. But, not all of the features are informative considering the
+largeness of your feature data sets. In fact, there may be the possibility of
+collinearity within the feature data sets, which may decrease the accuracy of
+your model. You will need to normalize the datasets together to be able to use
+them in training and validation. You may also need to remove non-informative
+features before training.
+
+2. Take the best or the combination of models you created for cell lines and
+predict drug response on `the PDX data set`. Plot metrics for each drug.
+
+* Which accuracy metric can you use for that purpose?
+* **HINT :** You may use Pearson Correlation and,the Spearman Correlation.
+Again, you will probably need to jointly normalize data sets to be able to use
+them in training and validation.
+
+* **IMPORTANT NOTE 1:** you should do cross-validation accuracy estimates when
+training your final/best model. 
+* **IMPORTANT NOTE 2:** `the PDX data set` is
+for `validation` **ONLY** and it shouldn't be used for training the model.
+
+3. Are panel sequencing results better than multi-omics ? Please provide
+explanation.
+
+***
+
+## 6. Summary of Data to be Used in Part II Tasks
+
+Below are all the necessary summary statistics about the data you will use to
+complete tasks. A summary of drug response data is given at the end of the
+document.
+
+### The CCLE Data {.tabset}
+
+#### Gene Expression Data from the CCLE
+
+The dimension of the gene expression data is **1305 x 883**. There are also no
+missing values present within the dataset.
+
+```{r CCLE_gex_pan statistics,message=FALSE,results='hide'}
+#read the data
+CCLE_gex_pan <- read.delim("data/CCLE/oncoKB_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(CCLE_gex_pan[,2:50]),xlab="Gene Expression values",
+     main="The CCLE Gene Expression ",border="white",
+     col="cornflowerblue",bins = 50)
+#Plot the boxplots for the Gene Expression values of the first 50 columns
+ boxplot(CCLE_gex_pan[,2:50],outline=FALSE, col="cornflowerblue",
+        xlab = "Gene Expression values",xaxt="n",
+        ylab = "Frequency",main = "The CCLE Gene Expression")
+
+```
+
+```{r CCLE_gex_pan NAs,eval=FALSE}
+#check the missing values of the data set
+CCLE_gex_pan[CCLE_gex_pan == "NA"] <- NA
+table(is.na(CCLE_gex_pan)) #FALSE:1152315   
+#There are no missing values
+```
+
+#### CNV Data from the CCLE
+
+There are no missing values present. Heatmap of the `CNV` data was plotted. The
+dimension of the CNV data is **1745 x 883 **.
+
+```{r CCLE_cnv_pan statistics2}
+#read the data
+CCLE_cnv_pan <- read.delim("data/CCLE/oncoKB_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+cols <- colorRampPalette(brewer.pal(6,name="Blues"))(12)
+
+pheatmap::pheatmap(CCLE_cnv_pan[,2:50],cluster_rows=FALSE,show_rownames = FALSE,main="Copy Number Data from the CCLE",color = cols)
+```
+
+```{r CCLE_cnv_pan NAs ,eval=FALSE}
+#check the missing values of the data set
+CCLE_cnv_pan[CCLE_cnv_pan == "NA"] <- NA
+table(is.na(CCLE_cnv_pan)) #FALSE:1540835    
+#There are no missing values
+```
+
+#### Mutation Data from the CCLE
+
+Below, the variant classification, top 10 mutated genes, variants per sample
+plots were plotted.
+
+**NOTE :** The`CCLE` mutation data contain missing values, so you have to deal
+with them in order to use.
+
+```{r CCLE_mut_pan statistics3}
+CCLE_mutdelim_pan <- read.delim(file = "data/CCLE/oncoKB_intersect_genes/mut.tsv",
+                               sep = "\t", header = TRUE, fill = TRUE,
+                            comment.char = "#") #read the mutation data 
+
+CCLE_mutdelim_pan$Tumor_Seq_Allele2 <- CCLE_mutdelim_pan$Tumor_Seq_Allele1
+CCLE_mut_pan <- read.maf(maf= CCLE_mutdelim_pan) #to convert and read it as maf file
+
+#Plot the summary of mutation data 
+plotmafSummary(maf = CCLE_mut_pan, rmOutlier = TRUE, addStat = 'median',
+               dashboard = TRUE,titvRaw = FALSE)
+```
+
+
+```{r CCLE_mutdelim_pan NAs}
+#check the missing values of the data set
+CCLE_mutdelim_pan[CCLE_mutdelim_pan == "NA"] <- NA
+table(is.na(CCLE_mutdelim_pan)) #FALSE: 3719170 , TRUE: 77150  
+#There are missing values
+```
+
+### The GDSC BROAD Data {.tabset}
+
+#### Gene Expression Data from the GDSC BROAD
+
+There are no missing values within the dataset. Check the distribution of data.
+The dimensions of the gene expression data is **613 x 886**.
+
+```{r BROAD_gex_pan statistics1}
+#read the data
+BROAD_gex_pan <- read.delim("data/GDSC_broad/oncoKB_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(BROAD_gex_pan[,2:50]),xlab="Gene Expression values",
+     main="The GDSC BROAD Histogram ",border="white",
+     col="Green",bins = 50)
+#Plot the boxplots for the Gene Expression values of the first 50 columns
+ boxplot(BROAD_gex_pan[,2:50],outline=FALSE, col="Green",
+        xlab = "Gene Expression values",xaxt="n",
+        ylab = "Frequency",main = "The GDSC BROAD BoxPlot")
+
+```
+
+
+```{r BROAD_gex_pan NAs,eval=FALSE}
+#check the missing values of the data set
+BROAD_gex_pan[BROAD_gex_pan == "NA"] <- NA
+table(is.na(BROAD_gex_pan)) #FALSE:543118    
+#There are no missing values
+```
+
+
+#### CNV Data from the GDSC BROAD
+
+Heatmap of the CNV data was plotted. There are no missing values present within the dataset.The dimensions of the CNV data is **891 x 18356**.
+
+```{r BROAD_cnv_pan statistics2}
+#read the data
+BROAD_cnv_pan <- read.delim("data/GDSC_broad/oncoKB_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+cols <- colorRampPalette(brewer.pal(6,name="Greens"))(12)
+
+pheatmap::pheatmap(BROAD_cnv_pan[,2:50],cluster_rows=FALSE,
+                   show_rownames = FALSE,
+                   main="Copy Number Data from the GDSC BROAD",col = cols)
+```
+
+```{r BROAD_cnv_pan NAs,eval=FALSE}
+#check the missing values of the data set
+BROAD_cnv_pan[BROAD_cnv_pan == "NA"] <- NA
+table(is.na(BROAD_cnv_pan)) #FALSE:786753    
+#There are no missing values
+```
+
+#### Mutation Data from the GDSC BROAD
+
+The frequency of each variant type and, top 10 mutated genes were plotted.
+
+**NOTE :** There are missing values present within the data.
+
+```{r BROAD_mutdelim_pan statistics3}
+BROAD_mutdelim_pan <- data.table::fread(
+  file = "data/GDSC_broad/oncoKB_intersect_genes/mut.tsv",sep = "\t", 
+  header = TRUE, fill = TRUE) #read the mutation data
+
+genesum <- maftools::getGeneSummary(MAF(BROAD_mutdelim_pan)) %>% group_by(Hugo_Symbol) %>% select(Hugo_Symbol,AlteredSamples) %>%
+  arrange() %>% head(10)
+
+Variant_Type <- BROAD_mutdelim_pan %>% group_by(Variant_Type) %>%
+count() %>% rename(frequency = n)
+
+var_plot <- ggplot(data=Variant_Type, aes(x=Variant_Type, y = frequency, fill=Variant_Type))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Variant Type") +
+  ylab("Frequency") +
+  xlab("Variant Type")
+
+ggplot(data=genesum, aes(x=reorder(Hugo_Symbol, AlteredSamples), y = AlteredSamples, fill = AlteredSamples))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Top 10 Mutated Genes Based on Altered Samples") +
+  ylab("Number of Altered Samples") +
+  xlab("Gene Names")+
+  theme(legend.position = "right")
+
+ ggplotly(var_plot)
+```
+
+```{r BROAD_mutdelim_pan NAs ,eval=FALSE}
+#check the missing values of the data set
+BROAD_mutdelim_pan[BROAD_mutdelim_pan == "NA"] <- NA
+table(is.na(BROAD_mutdelim_pan)) #FALSE: 2143308   , TRUE: 2256126  
+#There are missing values
+```
+
+### The GDSC SANGER Data {.tabset}
+
+#### Gene Expression Data from the GDSC SANGER
+
+A histogram and a boxplot were plotted to represent the expression values of the
+first fifty genes. There are no missing values present within the dataset.The
+dimensions of the gene expression data is **384 x 886**.
+
+```{r SANGER_gex_pan statistics1}
+#read the data
+SANGER_gex_pan <- read.delim("data/GDSC_sanger/oncoKB_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(SANGER_gex_pan[,2:50]),xlab="Gene Expression values",
+     main="The GDSC SANGER Histogram ",border="white",
+     col="Orange",bins = 50)
+#Plot the boxplots for the Gene Expression values of the first 50 columns
+ boxplot(SANGER_gex_pan[,2:50],outline=FALSE, col="Orange",
+        xlab = "Gene Expression values",xaxt="n",
+        ylab = "Frequency",main = "The GDSC SANGER BoxPlot")
+
+```
+
+```{r SANGER_gex_pan NAs,eval=FALSE}
+#check the missing values of the data set
+SANGER_gex_pan[SANGER_gex_pan == "NA"] <- NA
+table(is.na(SANGER_gex_pan)) #FALSE:340224    
+#There are no missing values
+```
+
+#### CNV Data from the GDSC SANGER
+
+Heatmap of the CNV data was plotted. There are no missing values present within
+the dataset. The dimensions of the CNV data is **891 x 883**.
+
+```{r SANGER_cnv_pan statistics2}
+#read the data
+SANGER_cnv_pan <- read.delim("data/GDSC_sanger/oncoKB_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+cols <- colorRampPalette(brewer.pal(6,name="Oranges"))(12)
+
+pheatmap::pheatmap(SANGER_cnv_pan[,2:50],cluster_rows=FALSE,show_rownames = FALSE,
+                     main="Copy Number Data from the GDSC SANGER", col=cols)
+```
+
+```{r SANGER_cnv_pan NAs ,eval=FALSE}
+#check the missing values of the data set
+SANGER_cnv_pan[SANGER_cnv_pan == "NA"] <- NA
+table(is.na(SANGER_cnv_pan)) #FALSE:786753     
+#There are no missing values
+```
+
+#### Mutation Data from the GDSC SANGER
+
+The frequency of each variant type and, top 10 mutated genes were plotted.
+
+**NOTE :** There are missing values present in the mutation data.
+
+```{r SANGER_mutdelim_pan statistics3}
+SANGER_mutdelim_pan <-data.table::fread(
+  file = "data/GDSC_sanger/oncoKB_intersect_genes/mut.tsv",sep = "\t", 
+  header = TRUE, fill = TRUE)#read the mutation data 
+
+genesum <- maftools::getGeneSummary(MAF(SANGER_mutdelim_pan)) %>%
+  group_by(Hugo_Symbol) %>% select(Hugo_Symbol,AlteredSamples) %>% arrange() %>%
+  head(10)
+
+Variant_Type <- SANGER_mutdelim_pan %>% group_by(Variant_Type) %>% count() %>%
+  rename(frequency = n)
+
+var_plot <- ggplot(data=Variant_Type, aes(x=Variant_Type, 
+                                          y = frequency, fill=Variant_Type))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Variant Type") +
+  ylab("Frequency") +
+  xlab("Variant Type")
+
+ggplot(data=genesum, aes(x=reorder(Hugo_Symbol, AlteredSamples), y = AlteredSamples, fill = AlteredSamples))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  ggtitle("Top 10 Mutated Genes Based on Altered Samples") +
+  ylab("Number of Altered Samples") +
+  xlab("Gene Names")+
+  theme(legend.position = "right")
+
+ ggplotly(var_plot)
+
+```
+
+```{r SANGER_mutdelim_pan NAs ,eval=FALSE}
+#check the missing values of the data set
+SANGER_mutdelim_pan[SANGER_mutdelim_pan == "NA"] <- NA
+table(is.na(SANGER_mutdelim_pan)) #FALSE: 2143308 , TRUE: 2256126    
+#There are missing values
+```
+
+### The PDX Data {.tabset}
+
+#### Gene Expression Data from the PDX
+
+There are no missing values present within the `PDX_all` data set. Check the
+distribution of gene expression. How does it differ from the distribution of
+gene expression values in other datasets? The dimension of the gene expression
+data is **399 x 883**.
+
+```{r PDX_gex_pan statistics1}
+#read the data
+PDX_gex_pan <- read.delim("data/PDX_all/oncoKB_intersect_genes/gex.tsv") %>% 
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+#Check for the normality
+ hist(unlist(PDX_gex_pan[,2:50]),xlab="The PDX Dataset",
+     main="The PDX Gene Expression ",border="white",
+     col="Purple")
+
+#Plot the boxplots for the Gene Expression values of the first 50 column
+PDX_gex_pan[,2:50] %>% boxplot(names = FALSE,outline=FALSE, col="Purple",
+                           xlab = "Gene Expression values",ylim = c(0,400),
+                           ylab = "Frequency",main = "The PDX Gene Expression")
+```
+
+
+```{r PDX_gex_pan NAs,eval=FALSE}
+#check the missing values of the data set
+PDX_gex_pan[PDX_gex_pan == "NA"] <- NA
+table(is.na(PDX_gex_pan)) #FALSE:352317
+#There are no missing values
+```
+
+#### CNV Data from the PDX
+
+There are no missing values present. Heatmap of the CNV data was plotted. The
+dimension of the CNV data is **399 x 883**.
+
+```{r PDX_cnv_pan statistics2}
+#read the data
+PDX_cnv_pan <- read.delim("data/PDX_all/oncoKB_intersect_genes/cnv.tsv") %>%
+  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
+
+cols <- colorRampPalette(brewer.pal(6,name="Purples"))(12)
+pheatmap::pheatmap(PDX_cnv_pan[,2:50],cluster_rows=FALSE,show_rownames = FALSE,
+                     main="Copy Number Data from the PDX",color = cols)
+```
+
+
+```{r PDX_cnv_pan NAs ,eval=FALSE}
+#check the missing values of the data set
+PDX_cnv_pan[PDX_cnv_pan == "NA"] <- NA
+table(is.na(PDX_cnv_pan)) #FALSE:352317      
+#There are no missing values
+```
+
+#### Mutation Data from the PDX
+
+The histogram of the mutation frequency values were plotted.
+
+```{r PDX_mutdelim_pan statistics3}
+PDX_mutdelim_pan <- read.delim(file = "data/PDX_all/oncoKB_intersect_genes/mut.tsv", 
+                               sep = "\t", header = TRUE, fill = TRUE,
+                            comment.char = "#") #read the mutation data 
+
+hist(unlist(PDX_mutdelim_pan[,84]),xlab="Mutation Values",
+     main="The PDX Mutation Frequency",border="white",
+     col="Purple",bins = 10)
+
+```
+
+```{r PDX_mutdelim_pan NAs ,eval=FALSE}
+#check the missing values of the data set
+PDX_mutdelim_pan[PDX_mutdelim_pan == "NA"] <- NA
+table(is.na(PDX_mutdelim_pan)) #FALSE: 75781 , TRUE: 787536     
+#There are missing values
+```
+
+***
+
+## 7. The Capstone Project: PART III Tasks
+
+Your tasks include:
+
+1. Does each omic dataset need to be normalized with the same method or
+different normalization methods for different omic data changes CV and PDX
+performance? What are the best normalization methods ?
+
+2. Does training on cell lines only for cancers that are present in PDX change
+the performance?
+
+***
+
+## 8. The Drug Response Data {.tabset}
+
+As mentioned in the introduction section, there are different drug response data
+present for six different drugs within the drug response folder. These are the
+six common drugs that are used for the treatment of several cancer types.
+
+### The Drug Response data of the CCLE
+
+The distribution of each drug was plotted. Check the difference in drug response
+distribution for each drug.
+
+**NOTE :** The`CCLE` drug response data does not contain any missing values.
+
+```{r drug_resp_CCLE}
+# Read and Combine all of the response data 
+drug_resp_CCLE <- read.delim("data/CCLE/drug_response/ALPELISIB.tsv") %>%
+  dplyr::bind_rows(read.delim("data/CCLE/drug_response/BUPARLISIB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/CCLE/drug_response/CETUXIMAB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/CCLE/drug_response/ERLOTINIB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/CCLE/drug_response/RIBOCICLIB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/CCLE/drug_response/TRAMETINIB.tsv")) %>%
+  rename(drug = column_name)
+
+table(drug_resp_CCLE$drug) #Print how many response data present 
+
+drug_plot <- drug_resp_CCLE %>% group_by(drug) %>% 
+  ggplot(aes(x = value,fill=drug)) +
+  geom_histogram(color="black",bins = 50) +
+  facet_wrap(drug ~ ., scales = 'free_x')+
+  scale_y_sqrt()+
+  ggtitle("Distribution of the Response Value Among the Drugs :the CCLE")+
+  xlab("Response Values")+
+  ylab("Frequency")
+
+ggplotly(drug_plot)
+```
+
+```{r drug_resp_CCLE NAs ,eval=FALSE}
+drug_resp_CCLE[drug_resp_CCLE == "NA"] <-  NA 
+#Introduce missing values
+table(drug_resp_CCLE$drug, is.na(drug_resp_CCLE$value)) 
+# check if there are missing values
+```
+
+### The Drug Response data of the GDSC BROAD
+
+Histograms were plotted to represent the distributions of the response values
+for each drug. Check the plots. Does it look like the distribution of the CCLE's
+drug response values?
+
+**NOTE :** There are no missing values present within the GDSC BROAD dataset.
+
+```{r drug_resp_BROAD}
+# Read and Combine all of the response data 
+drug_resp_BROAD <- read.delim("data/GDSC_broad/drug_response/ALPELISIB.tsv") %>%
+  dplyr::bind_rows(read.delim("data/GDSC_broad/drug_response/BUPARLISIB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_broad/drug_response/CETUXIMAB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_broad/drug_response/ERLOTINIB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_broad/drug_response/RIBOCICLIB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_broad/drug_response/TRAMETINIB.tsv"))%>%
+  rename(drug = column_name)
+
+table(drug_resp_BROAD$drug) #Print how many response data present 
+
+drug_plot <- drug_resp_BROAD %>% group_by(drug) %>% 
+  ggplot(aes(x = value , fill=drug)) +
+  geom_histogram(color="black",bins = 50) +
+  facet_wrap(drug ~ ., scales = 'free_x')+
+  scale_y_sqrt()+
+  ggtitle("Distribution of the Response Values: the GDSC BROAD")+
+  xlab("Response Values")+
+  ylab("Frequency")
+
+ggplotly(drug_plot)
+
+```
+
+```{r drug_resp_BROAD NAs ,eval=FALSE}
+drug_resp_BROAD[drug_resp_BROAD == "NA"] <-  NA 
+#Introduce missing values
+table(drug_resp_BROAD$drug, is.na(drug_resp_BROAD$value)) 
+# check if there are missing values
+```
+
+### The Drug Response data of the GDSC SANGER
+
+Histograms were plotted to represent the distributions of the response values
+for each drug. Check the plots. Does it look like the distribution of the CCLE's
+and BROAD'S drug response values? In addition, the number of samples for each
+drug was printed in the table.
+
+**NOTE :** There are no missing values present within the GDSC SANGER dataset.
+```{r drug_resp_sanger}
+# Read and Combine all of the response data 
+drug_resp_sanger <- read.delim("data/GDSC_sanger/drug_response/ALPELISIB.tsv")%>%
+  dplyr::bind_rows(read.delim("data/GDSC_sanger/drug_response/BUPARLISIB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_sanger/drug_response/CETUXIMAB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_sanger/drug_response/ERLOTINIB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_sanger/drug_response/RIBOCICLIB.tsv"))%>%
+  dplyr::bind_rows(read.delim("data/GDSC_sanger/drug_response/TRAMETINIB.tsv"))%>%
+  rename(drug = column_name)
+
+table(drug_resp_sanger$drug) #Print how many response data present 
+
+drug_plot <- drug_resp_sanger %>% group_by(drug) %>% 
+  ggplot(aes(x = value , fill=drug)) +
+  geom_histogram(color="black",bins = 50) +
+  facet_wrap(drug ~ ., scales = 'free_x')+
+  scale_y_sqrt()+
+  ggtitle("Distribution of the Response Value Among the Drugs :GDSC SANGER")+
+  xlab("Response Values")+
+  ylab("Frequency")
+
+ggplotly(drug_plot)
+```
+
+```{r drug_resp_sanger NAs ,eval=FALSE}
+drug_resp_sanger[drug_resp_sanger == "NA"] <-  NA 
+#Introduce missing values
+table(drug_resp_sanger$drug, is.na(drug_resp_sanger$value)) 
+# check if there are missing values
+```
+
+### The Drug Response data of the PDX
+
+Histograms were plotted to represent the distributions of the response values
+for each drug. Check the plots. Does it look like the distribution of the
+CCLE's, SANGER's and BROAD'S drug response values? In addition, the number of
+samples for each drug was printed in the table.
+
+```{r drug_resp_PDX}
+# Read and Combine all of the response data 
+drug_resp_PDX <- read.delim("data/PDX_all/drug_response/ALPELISIB.tsv") %>%
+  dplyr::bind_rows(read.delim("data/PDX_all/drug_response/BUPARLISIB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/PDX_all/drug_response/CETUXIMAB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/PDX_all/drug_response/ERLOTINIB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/PDX_all/drug_response/RIBOCICLIB.tsv")) %>%
+  dplyr::bind_rows(read.delim("data/PDX_all/drug_response/TRAMETINIB.tsv")) %>%
+  rename(drug = column_name)
+
+table(drug_resp_PDX$drug) #Print how many response data present 
+
+drug_plot <- drug_resp_PDX %>% group_by(drug) %>%
+  ggplot(aes(x = value , fill=drug)) +
+  geom_histogram(color="black",bins = 50) +
+  facet_wrap(drug ~ ., scales = 'free_x')+
+  scale_y_sqrt()+
+  ggtitle("Distribution of the Response Value Among the Drugs :the PDX")+
+  xlab("Response Values")+
+  ylab("Frequency")
+
+ggplotly(drug_plot)
+```
+
+* **NOTE :** There are missing values present within the drug response data set.
+In the table you can see the number of missing values for each drugs.
+
+```{r drug_resp_PDX NAs}
+drug_resp_PDX[drug_resp_PDX == "NA"] <-  NA 
+#Introduce missing values
+table(drug_resp_PDX$drug, is.na(drug_resp_PDX$value)) 
+# check if there are missing values
+```
+
+***
+
+## References
+
+
