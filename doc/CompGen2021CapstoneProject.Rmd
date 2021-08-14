@@ -738,34 +738,6 @@ document.
 
 ### The CCLE Data {.tabset}
 
-#### Gene Expression Data from the CCLE
-
-The dimension of the gene expression data is **1305 x 883**. There are also no
-missing values present within the dataset.
-
-```{r CCLE_gex_pan statistics,message=FALSE,results='hide'}
-#read the data
-CCLE_gex_pan <- read.delim("data/CCLE/oncoKB_intersect_genes/gex.tsv") %>% 
-  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
-
-#Check for the normality
- hist(unlist(CCLE_gex_pan[,2:50]),xlab="Gene Expression values",
-     main="The CCLE Gene Expression ",border="white",
-     col="cornflowerblue",bins = 50)
-#Plot the boxplots for the Gene Expression values of the first 50 columns
- boxplot(CCLE_gex_pan[,2:50],outline=FALSE, col="cornflowerblue",
-        xlab = "Gene Expression values",xaxt="n",
-        ylab = "Frequency",main = "The CCLE Gene Expression")
-
-```
-
-```{r CCLE_gex_pan NAs,eval=FALSE}
-#check the missing values of the data set
-CCLE_gex_pan[CCLE_gex_pan == "NA"] <- NA
-table(is.na(CCLE_gex_pan)) #FALSE:1152315   
-#There are no missing values
-```
-
 #### CNV Data from the CCLE
 
 There are no missing values present. Heatmap of the `CNV` data was plotted. The
@@ -818,36 +790,6 @@ table(is.na(CCLE_mutdelim_pan)) #FALSE: 3719170 , TRUE: 77150
 ```
 
 ### The GDSC BROAD Data {.tabset}
-
-#### Gene Expression Data from the GDSC BROAD
-
-There are no missing values within the dataset. Check the distribution of data.
-The dimensions of the gene expression data is **613 x 886**.
-
-```{r BROAD_gex_pan statistics1}
-#read the data
-BROAD_gex_pan <- read.delim("data/GDSC_broad/oncoKB_intersect_genes/gex.tsv") %>% 
-  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
-
-#Check for the normality
- hist(unlist(BROAD_gex_pan[,2:50]),xlab="Gene Expression values",
-     main="The GDSC BROAD Histogram ",border="white",
-     col="Green",bins = 50)
-#Plot the boxplots for the Gene Expression values of the first 50 columns
- boxplot(BROAD_gex_pan[,2:50],outline=FALSE, col="Green",
-        xlab = "Gene Expression values",xaxt="n",
-        ylab = "Frequency",main = "The GDSC BROAD BoxPlot")
-
-```
-
-
-```{r BROAD_gex_pan NAs,eval=FALSE}
-#check the missing values of the data set
-BROAD_gex_pan[BROAD_gex_pan == "NA"] <- NA
-table(is.na(BROAD_gex_pan)) #FALSE:543118    
-#There are no missing values
-```
-
 
 #### CNV Data from the GDSC BROAD
 
@@ -915,35 +857,6 @@ table(is.na(BROAD_mutdelim_pan)) #FALSE: 2143308   , TRUE: 2256126
 ```
 
 ### The GDSC SANGER Data {.tabset}
-
-#### Gene Expression Data from the GDSC SANGER
-
-A histogram and a boxplot were plotted to represent the expression values of the
-first fifty genes. There are no missing values present within the dataset.The
-dimensions of the gene expression data is **384 x 886**.
-
-```{r SANGER_gex_pan statistics1}
-#read the data
-SANGER_gex_pan <- read.delim("data/GDSC_sanger/oncoKB_intersect_genes/gex.tsv") %>% 
-  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
-
-#Check for the normality
- hist(unlist(SANGER_gex_pan[,2:50]),xlab="Gene Expression values",
-     main="The GDSC SANGER Histogram ",border="white",
-     col="Orange",bins = 50)
-#Plot the boxplots for the Gene Expression values of the first 50 columns
- boxplot(SANGER_gex_pan[,2:50],outline=FALSE, col="Orange",
-        xlab = "Gene Expression values",xaxt="n",
-        ylab = "Frequency",main = "The GDSC SANGER BoxPlot")
-
-```
-
-```{r SANGER_gex_pan NAs,eval=FALSE}
-#check the missing values of the data set
-SANGER_gex_pan[SANGER_gex_pan == "NA"] <- NA
-table(is.na(SANGER_gex_pan)) #FALSE:340224    
-#There are no missing values
-```
 
 #### CNV Data from the GDSC SANGER
 
@@ -1014,37 +927,6 @@ table(is.na(SANGER_mutdelim_pan)) #FALSE: 2143308 , TRUE: 2256126
 ```
 
 ### The PDX Data {.tabset}
-
-#### Gene Expression Data from the PDX
-
-There are no missing values present within the `PDX_all` data set. Check the
-distribution of gene expression. How does it differ from the distribution of
-gene expression values in other datasets? The dimension of the gene expression
-data is **399 x 883**.
-
-```{r PDX_gex_pan statistics1}
-#read the data
-PDX_gex_pan <- read.delim("data/PDX_all/oncoKB_intersect_genes/gex.tsv") %>% 
-  rename(cell_lines = X) #Change the name of cell lines column to cell_lines
-
-#Check for the normality
- hist(unlist(PDX_gex_pan[,2:50]),xlab="The PDX Dataset",
-     main="The PDX Gene Expression ",border="white",
-     col="Purple")
-
-#Plot the boxplots for the Gene Expression values of the first 50 column
-PDX_gex_pan[,2:50] %>% boxplot(names = FALSE,outline=FALSE, col="Purple",
-                           xlab = "Gene Expression values",ylim = c(0,400),
-                           ylab = "Frequency",main = "The PDX Gene Expression")
-```
-
-
-```{r PDX_gex_pan NAs,eval=FALSE}
-#check the missing values of the data set
-PDX_gex_pan[PDX_gex_pan == "NA"] <- NA
-table(is.na(PDX_gex_pan)) #FALSE:352317
-#There are no missing values
-```
 
 #### CNV Data from the PDX
 
