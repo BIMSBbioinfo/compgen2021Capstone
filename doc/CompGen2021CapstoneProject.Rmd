@@ -1,6 +1,7 @@
 ---
 title: 'CompGen2021: The Capstone Project'
-author: Altuna Akalin,Vedran Franke,Bora Uyar,Jan Dohmen,Artem Baranovsky,İrem Begüm Gündüz
+author: Altuna Akalin,Vedran Franke,Bora Uyar,Jan Dohmen,Artem Baranovsky,İrem Begüm
+  Gündüz
 Date: "`r Sys.Date()`"
 output:
   html_document:
@@ -12,6 +13,8 @@ output:
     theme: journal
     highlight: haddock
     citation_package: natbib
+  pdf_document:
+    toc: yes
 bibliography: /Users/ibgun/Desktop/compgen2021Capstone/references.bib
 biblio-style: apalike
 link-citations: yes
@@ -165,7 +168,7 @@ contains three subfolders, as indicated in the `README` file as well. The
 `all_intersect_genes` folder contains all of the genomic data which are the
 predictive features that we will be using in our machine learning model. The
 `drug_response` folder contains the drug response data which is the continuous
-response variable that we will a training model to predict. There is six
+response variable that we will be training a model to predict. There is six
 different drug response data present within the `drug_response` folder.
 
 * `The Cancer Cell Line Encyclopedia (CCLE)` project is an effort to conduct a
@@ -184,32 +187,38 @@ lines. You can get more info on `the GDSC` from
 [here.](https://academic.oup.com/nar/article/41/D1/D955/1059448) @Yang
 
 * `Genomics of Drug Sensitivity in Cancer (GDSC)` consists of two batches:
-  1. BROAD half of cell lines sequenced in Broad, from BROAD cell line library, which you can find in `GDSC_BROAD` data folder.
-  2. SANGER half of cell lines sequences in Sanger from the SANGER cell line library which you can find in `GDSC_SANGER` data folder.
+  1. **BROAD:** half of cell lines sequenced in Broad, from BROAD cell line library, which you can find in `GDSC_BROAD` data folder.
+  2. **SANGER:** half of cell lines sequenced in Sanger from the SANGER cell line library which you can find in `GDSC_SANGER` data folder.
 
-**NOTE : **  Even though they might have overlapped cell lines,`GDSC_BROAD`
+**NOTE : **  Even though they might have overlapping cell lines,`GDSC_BROAD`
 and `CCLE` are completely different datasets.
 
 * The data within `The CCLE` and `The GDSC` databases can be considered as kinds
 of `CMA` data which stands for `Cell-Line Microrray`. `CMAs` are the tumor
-samples that are grown in the lab environment. `CMAs`are poor representations of
-actual tumors despite using so widely in researches. The reason for this is the
+samples that are grown in the lab environment. `CMAs` are poor representations of
+actual tumors despite being widely utilized in research. The reason for this is the
 way `CMAs` are produced.
 
 * When a biopsy sample is taken from a patient, this sample is injected into
 mice in the lab. After the tumor develops again on mice, it is taken from the
-mouse and divided into slices ,and cultured. Tumors are solid structures that
-consist of cells that are completely focused on division. The difference between
-`CMA` and tumor structures because only from the growth and division of cells
-located on the outside of the plate. The most important reason for this is that
-the cells in the internal structure of the tumor have limited access to oxygen.
-As a result, `CMA` is extremely useful in cancer research, but does not fully
-represent tumor cell structure.
+mouse and divided into slices and cultured. @Gillet2013 Tumors are solid
+structures that consist of cells that are completely focused on division. The
+difference between `CMAs` and tumor structures arises only from the growth and
+division of cells located outside the plate. The most important reason for this
+is that the cells in the internal structure of the tumor have limited access to
+oxygen. @Sulaiman2017 As a result, `CMA` is extremely useful in cancer research, but does not
+fully represent tumor cell structure. In the figure, the comparison of `PDX` and
+`Cell lines` were represented. @Sulaiman2017
+
+
+```{r pdx_vs_cma,fig.align="center", fig.height=15}
+knitr::include_graphics(c("The-main-differences-between-PDX-and-cell-line-xenografts-for-preclinical-research-In.png"))
+```
 
 * `PDX`, on the other hand, represents the tumor structure better than `CMAs`.
 So don't be surprised if you obtain different results on `PDX` data. `PDX`
 stands for `Patient-Derived Xenograft`. `PDX` is the re-creation of a tumor
-sample is taken by biopsy from the patient by injecting it into mice. We use the
+sample taken by biopsy from the patient by injecting it into mice. We use the
 `PDX` data to obtain more meaningful results clinically. In Figure 1 below you
 can see the overall representation for using `PDX` to test drug efficacy.
 @Jung2017 And the cell cultivation methodologies are represented in Figure 2.
@@ -217,20 +226,16 @@ can see the overall representation for using `PDX` to test drug efficacy.
 
 
 ```{r figures,fig.show="hold", out.width="45%"}
-knitr::include_graphics(c("https://www.researchgate.net/publication/292953008/figure/fig1/AS:565678451027968@1511879660297/Generation-of-PDX-models-Surgical-specimens-from-cancer-patients-are-divided-into-small.png","https://kosheeka.com/wp-content/uploads/2020/07/tumor-primary-cultures.jpg"))
+knitr::include_graphics(c("PDX.png","cellculture.jpg"))
 ```
 
  
 ***
 
-* The `Gene expression` measurement is usually achieved by quantifying levels of
-the gene product, which is often a protein. Two common techniques used for
-protein quantification include Western blotting and enzyme-linked immunosorbent
-assay or ELISA.Cancer can be described as a disease of altered gene expression.
-There are many proteins that are turned on or off (gene activation or gene
-silencing) that dramatically alter the overall activity of the cell. A gene that
-is not normally expressed in that cell can be switched on and expressed at high
-levels.
+* Cancer can be described as a disease of altered gene expression. There are
+many proteins that are turned on or off (gene activation or gene silencing) that
+dramatically alter the overall activity of the cell. A gene that is not normally
+expressed in that cell can be switched on and expressed at high levels.
 
 * **NOTE ** that the gene expression data was transformed. (values: log10 FPKM +
 0.01)
@@ -277,17 +282,19 @@ most robust metric previously. To learn more on response metrics click this
 Your tasks include:
 
 1. Train machine learning models to predict drug response on cell lines. Use one
-of the datasets to train a model and use other data set to validate the models.
+of the datasets to train a model and use another data set to validate the models.
 
-* Explain your model; what are your observations? How good the accuracy of your
-model to predict drug response when you train a a model with one data set,and
-validate to another? Do you have a good validation? accuracy on the other one?
-* **HINT:** You have large numbers of feature data and, you can use which
-one you'd like. But, not all of the features are informative considering the the
-largeness of your feature data sets. In fact, there may be the possibility of
-collinearity within the feature data sets, which may decrease the accuracy of
-your model. You will need to jointly normalize the datasets together to be able to use them in training and validation. You may also need to remove non-informative
-features before training.
+* Explain your model; what are your observations? How good is the accuracy of
+your model to predict drug response when you train a a model with one data set
+and validate to another? Do you have a good validation accuracy on the other
+one?
+* **HINT:** You have large numbers of features in the dataset and, you can use
+which one you'd like. But, not all of the features are informative considering
+the largeness of your feature datasets. In fact, there may be the possibility of
+collinearity within the feature datasets, which may decrease the accuracy of
+your model. You will need to jointly normalize the datasets together to be able
+to use them in training and validation. You may also need to remove
+non-informative features before training.
 
 2. Take the best or the combination of models you created for cell lines and
 predict drug response on `the PDX data set`. Plot metrics for each drug.
@@ -299,10 +306,10 @@ them in training and validation.
 
 * **IMPORTANT NOTE 1:** you should do cross-validation accuracy estimates when
 training your final/best model.
-* **IMPORTANT NOTE 2:** `the PDX data set` is for `validation` **ONLY** and it
+* **IMPORTANT NOTE 2:** `the PDX data set` is for `validation`  **ONLY** and it
 shouldn't be used for training the model.
 
-3. You may have noticed that some ` PDX validation `results are very different
+3. You may have noticed that some ` PDX validation` results are very different
 compared to cell lines or cross-validation on cell lines. This could be due to
 many different things, can you identify and remedy this problem? Show
 improvement on your previous PDX validation accuracy by employing your proposed
@@ -314,7 +321,7 @@ solution.
 
 ## 4. Summary of Data to be Used in Part I Tasks 
 
-Below are all the necessary summary statistics about the data you will use to
+Below some of the necessary summary statistics about the data you will use to
 complete tasks. A summary of drug response data is given at the end of the
 document.
 
@@ -405,9 +412,9 @@ table(is.na(CCLE_mutdelim)) #FALSE: 43439347 , TRUE: 886853
 
 #### Gene Expression Data from the GDSC BROAD
 
-A histogram and a bar plot were plotted for representing the frequency of the
-gene expression of `the GDSC BROAD` dataset. There are no missing values within
-the dataset. Check the distribution of data. The dimensions of the gene
+A histogram and a  boxplot were plotted for representing distribution of the
+gene expression values of `the GDSC BROAD` dataset. There are no missing values
+within the dataset. Check the distribution of data. The dimensions of the gene
 expression data is **613 x 18356**.
 
 ```{r BROAD_gex statistics1}
