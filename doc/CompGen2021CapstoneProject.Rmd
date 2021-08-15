@@ -158,6 +158,30 @@ TRApcaplot <- ccle_data %>% filter(drug == "TRAMETINIB") %>%
 cowplot::plot_grid(ALPpcaplot,BUPpcaplot,CETpcaplot,ERLpcaplot,RIBpcaplot,TRApcaplot)
 ```
 
+* **NOTE : ** To use mutation data, you need to make it binary. However, you may
+have limited memory problems with using this function. We recommend you run the
+code and save the data as `.rds`, then read the `.rds` file in a new session.
+You can do it by following the code snippet below.
+
+```{r mut_data_bin,eval=FALSE,class.source = 'fold-show'}
+#necessary libraries
+library(reshape2)
+library(data.table)
+
+#read the data
+CCLE_mut_pan <- read.delim("data/CCLE/oncoKB_intersect_genes/mut.tsv") %>%
+  select(sample_id,gene_id,protein_change) %>% #Select the necessary columns
+  as.data.table() %>% melt(id.vars = c("sample_id","gene_id"))
+
+CCLE_mut_pan <- dcast(CCLE_mut_pan, sample_id ~ gene_id + value, length)
+saveRDS(CCLE_mut_pan,"CCLE_mut_pan.rds") #save the data as a RDS file
+
+#Now open a new session then you can read and assign the data as a data frame
+ccle_mut_pan <- as.data.frame(readRDS("ccle_mut_pan.rds"))
+
+
+```
+
 ***
 
 ## 2. Get to Know Your Data
