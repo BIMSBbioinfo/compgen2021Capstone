@@ -13,7 +13,6 @@ The former contains omic data (CNV, mutations and gene expression) for all genes
 -----
 Subsequently, each folder in ```../all_intersect_genes/``` contains the following data: 
 
-
 ### gex.tsv:
         info: gene expression measurements
         shape: fat
@@ -31,6 +30,24 @@ Subsequently, each folder in ```../all_intersect_genes/``` contains the followin
         feature_column_names:
                 - Feature
                 - protein_change
+                
+ While, each folder in ```../oncoKB_intersect_genes/``` contains only CNV and mutations:  
+ 
+ ### cnv.tsv:
+        info: copy number variation estimations
+        shape: fat
+        values: binarized
+
+### mut.tsv:
+        info: mutation data
+        shape: tall
+        sample_column_name: sample_id
+        feature_column_names:
+                - Feature
+                - protein_change
+ 
+ 
+Finally, drug response estimations in each datasets are located at ```../drug_response/``` and contains the data below:
 
 ### drug_response.tsv:
         info: drug response data
