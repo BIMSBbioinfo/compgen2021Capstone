@@ -10,7 +10,7 @@ Every dataset is split into three directories:
 -      .../drug_response/
 The former contains omic data (CNV, mutations and gene expression) for all genes shared across datasets;\
 The second is composed of CNV and mutations data on genes from oncoKB cancer panel-seq;\
-The latter contains drug response data.\
+The latter contains drug response data.
 
 
 -----
