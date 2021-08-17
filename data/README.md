@@ -11,7 +11,7 @@ The former contains omic data (CNV, mutations and gene expression) for all genes
 
 
 -----
-Subsequently, each folder contains the following data: 
+Subsequently, each folder in ../all_intersect_genes/ contains the following data: 
 
 
 ### gex.tsv:
