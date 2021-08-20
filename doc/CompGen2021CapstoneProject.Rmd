@@ -55,7 +55,7 @@ The main aim of the tasks is
 to predict the response of 6 oncology drugs on different disease models. There are 3 main tasks as follows:
 - TASK 1: Predict drug response from multi-omics data
 - TASK 2: Predict drug response from panel sequencing data
-- TASK 3: Improving drug response predictions by normalizing/transforming data in a batch-aware manner.
+- TASK 3: Improving drug response predictions by transforming data in a batch-aware manner.
 
 
 The following page contains the tasks and all of the necessary information to
@@ -304,14 +304,15 @@ WE provide AUC values for PDX dataset as well, however AUC values are derived fr
 This task is about using multi-omics data to predict drug response (gene expression, CNVs and mutations). The datasets to be used 
 are in `all_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders.
 `PDX_all` should not be used for training, only for testing. The model parameters during training should not be optimized
-in anyway towards PDX prediction performance. This is **extremely important**.
+in anyway towards PDX prediction performance. This is **extremely important**. You should use all omics dataset in training not just expression.
 
 The sub-tasks are as follows:
 
 0. Check if you need some sort of normalization, filtering and/or transformation. These methods have to be applied in all training and test
 datasets. More complicated methods for batch effect correction is on Task 3 and don't belong in this task. 
 Just check if normalization, transformation and filtering is needed. And apply whatever you think is
-necessary. You can also experiment to see how different data processing techniques effects 
+necessary. You should first look at normalization and filtering per omic data type. You then can choose to concatanate filtered and normalized
+single omic datasets into a multi-omics matrix prior to training. You can also experiment to see how different data processing techniques effects 
 accuracy. But those experiments do not belong in the final report, just include the final
 processing method and state if you did some experimentation to arrive at that method.
 
@@ -384,24 +385,37 @@ shouldn't be used for training the model or optimizing any training parameter in
 
 
 
-## TASK 3: Improving drug response predictions by normalizing data in a batch-aware manner.
+## TASK 3: Improving drug response predictions by transforming the data in a batch-aware manner.
+The PDX and the cell line datasets are biologically different. On top of this, technical differences
+due to data acquisition and processing exists. These differences might drive the patterns we observe
+more than the biology that is related to the drug response, and the differences create so-called "batches"
+of data where data points cluster by technical effects rather than patters of interesting biology.
+Ideally, we can try to remove these differences and train models on datasets where these differences are removed.
+In many cases, we may not be able to completely remove these effects or removing these effects could also
+remove interesting biological patterns. However, there is also potential to produce better models that could
+have higher performance on PDX models. 
 
-Your tasks include:
+Keeping these in mind, the sub-tasks are as follows:
 
-1. Does each omic dataset need to be normalized with the same method or
-different normalization methods for different omic data changes CV and PDX
-performance? What are the best normalization methods ?
+1. Apply batch-removal methods on **multi-omics datasets**  (TASK 1) including PDX. You can choose to work with a subset or only one
+of the cell line datasets but PDX dataset must be in there prior to batch effect removal.
+After removal of the effect, train drug response prediction on cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK1  or not.
+You can try multiple batch removal methods. If that's the case, report PDX performance for each of the methods. 
 
-2. Does training on cell lines only for cancers that are present in PDX change
-the performance?
+2. Apply batch-removal methods to **panel sequnecing datasets** (TASK 2) including PDX. You can choose to work with a subset or only one
+of the cell line datasets but PDX dataset must be in there prior to batch effect removal.
+After removal of the effect, train drug response prediction on cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK 2 or not.
+You can try multiple batch removal methods. If that's the case, report PDX performance for each of the methods. 
 
-3. You may have noticed that some ` PDX validation` results are very different
-compared to cell lines or cross-validation on cell lines. This could be due to
-many different things, can you identify and remedy this problem? Show
-improvement on your previous PDX validation accuracy by employing your proposed
-solution.
+* **HINT :** Here are a few things to try for batch effect removal. You don't have to try these things, there are other methods but if you need a place to start these are possibly viable options.
+- use SVD, find eigenvectors associated with batch class, remove and reconstruct them.
+- use linear regression to remove effects example: https://rdrr.io/github/LTLA/batchelor/man/rescaleBatches.html or https://rdrr.io/github/LTLA/batchelor/man/regressBatches.html
+- use single-cell RNA-seq methods that uses mutual-nearest neighbours to correct for batch effects: https://rdrr.io/github/LTLA/batchelor/man/fastMNN.html
 
-* **HINT :** Consider the batch effects between different datasets.
+You might have problems applying these methods to binarized datasets such as mutation matrices. But you can try data transformations to make them work. 
+One easy trick to try on binary matrices is to set 0s to -1. Another one could be to try logistic regression residuals instead of linear regression residuals as
+`regressBatches` function does. You should probably try to use these methods in each omic data type seperately and construct corrected matrices for each of them.
+
 
 
 ## Summary of Data to be Used in TASK 1
