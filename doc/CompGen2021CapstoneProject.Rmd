@@ -36,9 +36,9 @@ suppressMessages(library("plotly"))
 
 ***
 
-Welcome to the capstone project of the Computational Genomics Course for
-Hands-on Data Analysis 2021: Machine Learning for Genomics. You can find more information about the course
-on the course [page.](https://compgen.mdc-berlin.de/) You can access the the Github
+Welcome to the capstone project of the "Computational Genomics:
+A Hands-on course on Machine Learning for Genomics". You can find more information about the course
+on the course [page.](https://bioinformatics.mdc-berlin.de/compgen/2021/) You can access the the Github
 repository of the course
 [here.](https://github.com/BIMSBbioinfo/compgen2021) You can also access the
 Github repository of the capstone project from
@@ -55,7 +55,7 @@ The main aim of the tasks is
 to predict the response of 6 oncology drugs on different disease models. There are 3 main tasks as follows:
 - TASK 1: Predict drug response from multi-omics data
 - TASK 2: Predict drug response from panel sequencing data
-- TASK 3: Improving drug response predictions by normalizing data in a batch-aware manner.
+- TASK 3: Improving drug response predictions by normalizing/transforming data in a batch-aware manner.
 
 
 The following page contains the tasks and all of the necessary information to
@@ -196,6 +196,8 @@ ccle_mut_pan <- as.data.frame(readRDS("ccle_mut_pan.rds"))
 
 ##  Get to Know The Data
 
+### Data sources
+
 * There are four main sections in the data file, which are **CCLE**,
 **PDX_ALL**, **GDSC_broad** and **GDSC_sanger**. Each of these main folders
 contains three subfolders, as indicated in the `README` file as well. The
@@ -249,17 +251,22 @@ knitr::include_graphics(c("PDX.png","cellculture.jpg"))
  
 ***
 
-* Cancer cells have altered gene expression. There are
-many genes that are abberantly turned on or off (gene activation or gene silencing) that
-dramatically alter the overall activity of the cell. In cancer, a gene that is not normally
-expressed in that cell or expressed in high levels can be switched on and expressed at high levels.
+### Data types
+
+#### Gene Expression
+* Cancer cells have altered gene expression. There could be
+many genes that are abberantly turned on or off that
+dramatically alter the overall activity of the cell. Gene expression data is provided for all sets
+in the multi-omics-related tasks.
 
 * **NOTE ** that the gene expression data was transformed. (values: log10 FPKM +
 0.01)
 
 ***
 
-* `CNV` stands for **Copy Number of Variation**. A `CNV` occurs is when the number of
+#### Copy Number of Variation
+
+* A `CNV`(**Copy Number of Variation**) occurs is when the number of
 copies of a particular gene or region vary from one individual to the next. It
 has long been recognized that some cancers are associated with elevated copy
 numbers of particular genes.For more information you can click the link
@@ -272,15 +279,14 @@ numbers of particular genes.For more information you can click the link
 
 ***
 
-* A `mutation` is a change. It creates an abnormal protein. Or it may prevent a
-protein's formation. An abnormal protein provides different information than a
-normal protein. This can cause cells to multiply uncontrollably and become
-cancerous. For more information on variant calling comparison between `the CCLE`
-and `the GDSC` link is
-[here.](https://www.researchgate.net/figure/CCLE-variant-calling-pipeline-and-CCLE-and-GDSC-comparison-a-Unified-pipeline_fig4_332961554)
+#### Mutation
+* A `mutation` is a change in the genome sequence compared to a reference. It may or may not result in abnormal proteins and/or changes in gene expression.
+Cancer is thought to develop due to mutations in key genes which start a cascade of molecular changes which results in a malignant cells, which multiply uncontrollably and could invade other tissues. We provide mutation data in an harmonized manner for all datasets. We recommend binarizing the mutation
+data before machine learning, one way to do this is provided below in the data summary sections. Other similar methods also exists here:  https://datatricks.co.uk/one-hot-encoding-in-r-three-simple-methods
 
 ***
 
+#### Drug response
 * `Drug response` data indicates the drug efficacy in cell lines and PDX. They are
 widely used in cancer research to prioritize drugs to be tested in patients.
 You'll notice the metric of the drug response is AUC. In pharmacology, the area
@@ -290,7 +296,7 @@ to a drug and its clearance rate from the body. AUC combines information about
 drug efficacy and potency into a single value, and it was reported to be the
 most robust metric previously. To learn more on response metrics click this
 [link](https://www.nature.com/articles/s41598-020-59656-2#:~:text=Having%20compared%20three%20drug%20response,most%20robust%20metric%20previously37.)
-For PDX dataset as well, AUC values are derived from tumor volume change. 
+WE provide AUC values for PDX dataset as well, however AUC values are derived from tumor volume change for PDX. It should be mentioned that the AUC does not measure the same things on the cell lines and PDX samples, and that the drug response distribution on PDX and Cell lines can be markedly different, even for same drugs. However, we expect/assume predictions on PDX using models trained on cell line AUCs should be correlated to PDX AUCs.
 
 ***
 
@@ -316,19 +322,18 @@ make a table or heatmap (with values on the cells) for the CV R-squared values.
 columns: GDSC_Sanger, GDSC_Broad, CCLE and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB   
 
 2. By now you have a tuned model for each drug and cell line dataset combination. What happens when you use a model trained on one cell line dataset on
-on the other two? For example, for a given drug say Cetuximab, apply the CCLE  model on GDSC_Sanger and GDSC_Broad datasets and record R-squared for those
-predictions. Then, you can take the GDSC_Broad model and apply it on other two and record R-squared values. If you keep doing this, for each drug you will have six values for R-squared. Output median and mean values as a table, and make boxplots for R-squared values of each drug as obtained above.
+on the other two? For example, for a given drug say Cetuximab, apply the `CCLE`  model on `GDSC_Sanger` and `GDSC_Broad` datasets and record R-squared for those
+predictions. Then, you can take the `GDSC_Broad` model and apply it on other two and record R-squared values. If you keep doing this, for each drug you will have six values for the R-squared measure. Output median and mean values as a table, and make boxplots for R-squared values of each drug as obtained above. Is there a dataset that results in poor models for many drugs? 
 
 3. Take the best model from sub-task 1 and also the combine the models models in an ensemble learner ( this could be simply averaging their output) and
-predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson correlation and Spearman's Correlation) for observed vs predicted efficacy of each drug. Did the simple model perform better than ensemble model?
+predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson correlation and Spearman's Correlation) for observed vs predicted efficacy of each drug. Did the simple model perform better than the ensemble model?
 
 
 * **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
-* **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. 
-Anything is OK but not every approach will be performant. 
+* **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. You don't have to use all the models in the ensemble, you can choose to remove a model if you believe it performs poorly. Anything is OK but not every approach will be performant. Use your imagination.
 
-* **IMPORTANT NOTE 2:** `the PDX data set` is for `validation`  **ONLY** and it
-shouldn't be used for training the model.
+* **IMPORTANT NOTE :** `the PDX data set` is for `validation`  **ONLY** and it
+shouldn't be used for training the model or optimizing any training parameter including ensemble models.
 
 
 
@@ -337,14 +342,6 @@ shouldn't be used for training the model.
 
 
 ## TASK 2: Predict drug response using panel sequencing data.
-
-If you ever look into the data folders, you may have noticed there is
-one more folder `oncoKB_intersect_genes`. This folder contains the panel
-sequencing data, which you will be using for part 2 tasks. Part 2 tasks are the
-same with Part 1 tasks, but you will be using panel sequencing data. In
-addition, you will be using the same drug response data that you used in the
-Part 1 tasks. There we would see if panel-sequencing works as well as
-multi-omics in terms of modeling drug response. 
 
 This task is about using panel sequencing data to predict drug response (CNVs and mutations for couple hundred to a thousand genes). The datasets to be used 
 are in `oncoKB_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders. In many clinical
@@ -375,11 +372,12 @@ predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearso
 
 
 * **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
-* **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. 
-Anything is OK but not every approach will be performant. 
+* **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. You don't have to use all the models in the ensemble, you can choose to remove a model if you believe it performs poorly. Anything is OK but not every approach will be performant. Use your imagination.
 
-* **IMPORTANT NOTE 2:** `the PDX data set` is for `validation`  **ONLY** and it
-shouldn't be used for training the model.
+* **IMPORTANT NOTE :** `the PDX data set` is for `validation`  **ONLY** and it
+shouldn't be used for training the model or optimizing any training parameter including ensemble models.
+
+4. Compare the best performing models for PDX prediction from TASK 1 and TASK2. Make informative figures and briefly discuss (2-3 sentences) if multi-omics or panel sequencing is better for modeling response judging from PDX results. 
 
 
 ***
