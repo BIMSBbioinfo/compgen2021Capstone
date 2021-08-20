@@ -69,7 +69,7 @@ to standardize the results we got.
 
 ***
 
-## 1. Quick Start 
+## Quick Start 
 
 All data can be accessed at
 [here.](https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_DrugResponse/prepared/index2.html)
@@ -194,7 +194,7 @@ ccle_mut_pan <- as.data.frame(readRDS("ccle_mut_pan.rds"))
 
 ***
 
-## 2. Get to Know The Data
+##  Get to Know The Data
 
 * There are four main sections in the data file, which are **CCLE**,
 **PDX_ALL**, **GDSC_broad** and **GDSC_sanger**. Each of these main folders
@@ -294,7 +294,7 @@ For PDX dataset as well, AUC values are derived from tumor volume change.
 
 ***
 
-## 3. TASK 1: use multi-omics data to predict drug response
+## TASK 1: use multi-omics data to predict drug response
 This task is about using multi-omics data to predict drug response (gene expression, CNVs and mutations). The datasets to be used 
 are in `all_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders.
 `PDX_all` should not be used for training, only for testing. The model parameters during training should not be optimized
@@ -316,18 +316,86 @@ make a table or heatmap (with values on the cells) for the CV R-squared values.
 columns: GDSC_Sanger, GDSC_Broad, CCLE and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB   
 
 2. By now you have a tuned model for each drug and cell line dataset combination. What happens when you use a model trained on one cell line dataset on
-on the other two? For example, for a given drug say Cetuximab, apply the CCLE model on GDSC_Sanger model [MORE HERE]
+on the other two? For example, for a given drug say Cetuximab, apply the CCLE  model on GDSC_Sanger and GDSC_Broad datasets and record R-squared for those
+predictions. Then, you can take the GDSC_Broad model and apply it on other two and record R-squared values. If you keep doing this, for each drug you will have six values for R-squared. Output median and mean values as a table, and make boxplots for R-squared values of each drug as obtained above.
 
-3. Take the best model from sub-task 1 and also the combine the models models in an ensemble earner or simply average their output and
-predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson correlation and Spearman's Correlation) for observed vs predicted efficacy of each drug. Did the simple model [MORE HERE]
+3. Take the best model from sub-task 1 and also the combine the models models in an ensemble learner ( this could be simply averaging their output) and
+predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson correlation and Spearman's Correlation) for observed vs predicted efficacy of each drug. Did the simple model perform better than ensemble model?
 
 
-* Which accuracy metric can you use for that purpose?
+* **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
 * **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. 
-* Anything is OK but not everything will be performant. 
+Anything is OK but not every approach will be performant. 
 
 * **IMPORTANT NOTE 2:** `the PDX data set` is for `validation`  **ONLY** and it
 shouldn't be used for training the model.
+
+
+
+***
+
+
+
+## TASK 2: Predict drug response using panel sequencing data.
+
+If you ever look into the data folders, you may have noticed there is
+one more folder `oncoKB_intersect_genes`. This folder contains the panel
+sequencing data, which you will be using for part 2 tasks. Part 2 tasks are the
+same with Part 1 tasks, but you will be using panel sequencing data. In
+addition, you will be using the same drug response data that you used in the
+Part 1 tasks. There we would see if panel-sequencing works as well as
+multi-omics in terms of modeling drug response. 
+
+This task is about using panel sequencing data to predict drug response (CNVs and mutations for couple hundred to a thousand genes). The datasets to be used 
+are in `oncoKB_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders. In many clinical
+`PDX_all` should not be used for training, only for testing. The model parameters during training should not be optimized
+in anyway towards PDX prediction performance. This is **extremely important**.
+
+The sub-tasks are as follows:
+
+0. Check if you need some sort of normalization, filtering and/or transformation. These methods have to be applied in all training and test
+datasets. More complicated methods for batch effect correction is on Task 3 and don't belong in this task. 
+Just check if normalization, transformation and filtering is needed. And apply whatever you think is
+necessary. You can also experiment to see how different data processing techniques effects 
+accuracy. But those experiments do not belong in the final report, just include the final
+processing method and state if you did some experimentation to arrive at that method.
+
+1. Train machine learning models to predict drug response on each cell line dataset (GDSC_Sanger, GDSC_Broad, CCLE) using 10-fold cross-validation.
+You can use any machine learning model available to you in R and tune its performance. You would train a model for each drug and each cell line 
+dataset. For those best, performaing models, 
+make a table or heatmap (with values on the cells) for the CV R-squared values. 
+columns: GDSC_Sanger, GDSC_Broad, CCLE and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB   
+
+2. By now you have a tuned model for each drug and cell line dataset combination. What happens when you use a model trained on one cell line dataset on
+on the other two? For example, for a given drug say Cetuximab, apply the CCLE  model on GDSC_Sanger and GDSC_Broad datasets and record R-squared for those
+predictions. Then, you can take the GDSC_Broad model and apply it on other two and record R-squared values. If you keep doing this, for each drug you will have six values for R-squared. Output median and mean values as a table, and make boxplots for R-squared values of each drug as obtained above.
+
+3. Take the best model from sub-task 1 and also the combine the models models in an ensemble learner ( this could be simply averaging their output) and
+predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson correlation and Spearman's Correlation) for observed vs predicted efficacy of each drug. Did the simple model perform better than ensemble model?
+
+
+* **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
+* **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. 
+Anything is OK but not every approach will be performant. 
+
+* **IMPORTANT NOTE 2:** `the PDX data set` is for `validation`  **ONLY** and it
+shouldn't be used for training the model.
+
+
+***
+
+
+
+## TASK 3: Improving drug response predictions by normalizing data in a batch-aware manner.
+
+Your tasks include:
+
+1. Does each omic dataset need to be normalized with the same method or
+different normalization methods for different omic data changes CV and PDX
+performance? What are the best normalization methods ?
+
+2. Does training on cell lines only for cancers that are present in PDX change
+the performance?
 
 3. You may have noticed that some ` PDX validation` results are very different
 compared to cell lines or cross-validation on cell lines. This could be due to
@@ -337,9 +405,8 @@ solution.
 
 * **HINT :** Consider the batch effects between different datasets.
 
-***
 
-### Summary of Data to be Used in Part I Tasks 
+## Summary of Data to be Used in TASK 1
 
 Below some of the necessary summary statistics about the data you will use to
 complete tasks. A summary of drug response data is given at the end of the
@@ -706,51 +773,8 @@ table(is.na(PDX_mutdelim)) #FALSE: 806164 , TRUE: 8432975
 
 ***
 
-## 5. TASK 2: Predict drug response using panel sequencing data.
 
-If you ever look into the data folders, you may have noticed there is
-one more folder `oncoKB_intersect_genes`. This folder contains the panel
-sequencing data, which you will be using for part 2 tasks. Part 2 tasks are the
-same with Part 1 tasks, but you will be using panel sequencing data. In
-addition, you will be using the same drug response data that you used in the
-Part 1 tasks. There we would see if panel-sequencing works as well as
-multi-omics in terms of modeling drug response. 
-
-Your tasks include:
-
-1. Train machine learning models to predict drug response on cell lines. Use one
-of the datasets to train a model and use other data set to validate the models.
-
-* Explain your model, what are your observations? How good the accuracy of your
-model to predict drug response when you train a model with one data set, and
-validate to another? Do you have a good validation accuracy on the other one?
-* **HINT :** You have large numbers of feature data and, you can use which one
-you'd like. But, not all of the features are informative considering the
-largeness of your feature data sets. In fact, there may be the possibility of
-collinearity within the feature data sets, which may decrease the accuracy of
-your model. You will need to normalize the datasets together to be able to use
-them in training and validation. You may also need to remove non-informative
-features before training.
-
-2. Take the best or the combination of models you created for cell lines and
-predict drug response on `the PDX data set`. Plot metrics for each drug.
-
-* Which accuracy metric can you use for that purpose?
-* **HINT :** You may use Pearson Correlation and,the Spearman Correlation.
-Again, you will probably need to jointly normalize data sets to be able to use
-them in training and validation.
-
-* **IMPORTANT NOTE 1:** you should do cross-validation accuracy estimates when
-training your final/best model. 
-* **IMPORTANT NOTE 2:** `the PDX data set` is
-for `validation` **ONLY** and it shouldn't be used for training the model.
-
-3. Are panel sequencing results better than multi-omics ? Please provide
-explanation.
-
-***
-
-### Summary of Data to be Used in Part II Tasks
+## Summary of Data to be Used in TASK 2
 
 Below are all the necessary summary statistics about the data you will use to
 complete tasks. A summary of drug response data is given at the end of the
@@ -995,20 +1019,8 @@ table(is.na(PDX_mutdelim_pan)) #FALSE: 75781 , TRUE: 787536
 
 ***
 
-## 7. The Capstone Project: PART III Tasks
 
-Your tasks include:
-
-1. Does each omic dataset need to be normalized with the same method or
-different normalization methods for different omic data changes CV and PDX
-performance? What are the best normalization methods ?
-
-2. Does training on cell lines only for cancers that are present in PDX change
-the performance?
-
-***
-
-## 8. The Drug Response Data {.tabset}
+## The Drug Response Data {.tabset}
 
 As mentioned in the introduction section, there are different drug response data
 present for six different drugs within the drug response folder. These are the
