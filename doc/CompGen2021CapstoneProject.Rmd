@@ -38,9 +38,9 @@ suppressMessages(library("plotly"))
 ***
 
 Welcome to the capstone project of the Computational Genomics Course for
-Hands-on Data Analysis 2021: Machine Learning for Genomics!
+Hands-on Data Analysis 2021: Machine Learning for Genomics!  The main aim of the tasks is
+to predict the response of 6 oncology drugs on different disease models.
 
-This course is designed to teach the application of machine learning in genomics. 
 You can find more information about the course
 on the course [page.](https://compgen.mdc-berlin.de/) You can access the the Github
 repository of the course
@@ -50,8 +50,9 @@ Github repository of the capstone project from
 
 The capstone project tasks are designed using data from a real world problem.
 The participants who provide the best reports for the capstone projects will be
-invited to co-author a manuscript with the Akalin lab. The main aim of the tasks is
-to predict the response of 6 oncology drugs on different disease models.
+invited to co-author a manuscript with the Akalin lab. **We are looking for best performing
+methods and in addition also looking for
+interesting visualization and/or data processing/correction methods that might enrich the manuscript.**
 
 The following page contains the tasks and all of the necessary information to
 start the capstone project. Please provide documented code and figures for the
@@ -289,10 +290,16 @@ For PDX dataset as well, AUC values are derived from tumor volume change.
 
 ***
 
-## 3. The Capstone Project: PART I Tasks
-This task is about using multi-omics data to predict drug response.
+## 3. TASK 1: use multi-omics data to predict drug response
+This task is about using multi-omics data to predict drug response (gene expression, CNVs and mutations). The datasets to be used 
+are in `all_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders.
+`PDX_all` should not be used for training, only for testing. The model parameters during training should not be optimized
+in anyway towards PDX prediction performance. This is extremely important.
 
-Your tasks include:
+The sub-tasks are as follows:
+
+0. Check if you need some sort of normalization, scaling or data processing. More complicated
+methods for batch effect correction is on Task 3 and doesn't belong in this task.
 
 1. Train machine learning models to predict drug response on cell lines. Use one
 of the datasets to train a model and use another data set to validate the models.
