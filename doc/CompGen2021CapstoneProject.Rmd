@@ -1,6 +1,6 @@
 ---
 title: 'CompGen2021: The Capstone Project'
-author: Altuna Akalin,Vedran Franke,Bora Uyar,Jan Dohmen,Artem Baranovsky,İrem Begüm
+author:   İrem Begüm, Bora Uyar, Vedran Franke, Jan Dohmen, Artem Baranovsky, Altuna Akalin
   Gündüz
 Date: "`r Sys.Date()`"
 output:
@@ -40,21 +40,27 @@ suppressMessages(library("plotly"))
 Welcome to the capstone project of the Computational Genomics Course for
 Hands-on Data Analysis 2021: Machine Learning for Genomics!
 
-This course is designed to teach the application of machine learning in genomics
-statistically and conceptually. You can find more information about the course
-on the course [page.](https://compgen.mdc-berlin.de/) To access the the Github
-repository of the course click
+This course is designed to teach the application of machine learning in genomics. 
+You can find more information about the course
+on the course [page.](https://compgen.mdc-berlin.de/) You can access the the Github
+repository of the course
 [here.](https://github.com/BIMSBbioinfo/compgen2021) You can also access the
 Github repository of the capstone project from
 [here.](https://github.com/BIMSBbioinfo/compgen2021Capstone)
 
 The capstone project tasks are designed using data from a real world problem.
 The participants who provide the best reports for the capstone projects will be
-invited to co-author a manuscript with the Akalin lab.
+invited to co-author a manuscript with the Akalin lab. The main aim of the tasks is
+to predict the response of 6 oncology drugs on different disease models.
 
 The following page contains the tasks and all of the necessary information to
 start the capstone project. Please provide documented code and figures for the
-problems below in PDF format.
+problems below in PDF format. **The report does not have to include the time consuming parts
+regarding model tuning etc.**. You can run those computational experiments outside the report 
+and simply include the best parameters in the report explaining in the text how you tuned the parameters. 
+
+In addition, you will need to fill a form on the results to be able
+to standardize the results we got. 
 
 ***
 
@@ -69,7 +75,6 @@ and just type `wget link`.
 
 * For example: `wget https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_DrugResponse/prepared/AAkalin_DrugResponse-prepared.tar.gz`. Typing this command will download the entire data folder.If you're having any issues on wget command, you can get more information from the link [here.](https://linuxize.com/post/wget-command-examples/#installing-wget)
 
-* Another example: You can download the data with wget and assign a specific name by typing `wget -O CCLE_gex.zip https://bimsbstatic.mdc-berlin.de/akalin/AAkalin_DrugResponse/prepared/CCLE/all_intersect_genes/gex.tsv.gz`. Typing this command will download the gene expression data from the CCLE with a specific name CCLE_gex.
 
 * Once you download the data, you need to unzip it.You can use `gunzip()`
 function to unzip the file with **.gz** extension. Additionally, you may also
@@ -184,7 +189,7 @@ ccle_mut_pan <- as.data.frame(readRDS("ccle_mut_pan.rds"))
 
 ***
 
-## 2. Get to Know Your Data
+## 2. Get to Know The Data
 
 * There are four main sections in the data file, which are **CCLE**,
 **PDX_ALL**, **GDSC_broad** and **GDSC_sanger**. Each of these main folders
@@ -215,35 +220,18 @@ lines. You can get more info on `the GDSC` from
   2. **SANGER:** half of cell lines sequenced in Sanger from the SANGER cell line library which you can find in `GDSC_SANGER` data folder.
 
 **NOTE : **  Even though they might have overlapping cell lines,`GDSC_BROAD`
-and `CCLE` are completely different datasets.
+and `CCLE` are different datasets.
 
 * The data within `The CCLE` and `The GDSC` databases can be considered as kinds
-of `CMA` data which stands for `Cell-Line Microrray`. `CMAs` are the tumor
-samples that are grown in the lab environment. `CMAs` are poor representations of
-actual tumors despite being widely utilized in research. The reason for this is the
-way `CMAs` are produced.
+of `CMA` data which stands for `Cell-Line Microrray`. Cell lines are the tumor
+samples that are grown in the lab environment. Cell lines are poor representations of
+actual tumors despite being widely utilized in research. 
 
-* When a biopsy sample is taken from a patient, this sample is injected into
-mice in the lab. After the tumor develops again on mice, it is taken from the
-mouse and divided into slices and cultured. @Gillet2013 Tumors are solid
-structures that consist of cells that are completely focused on division. The
-difference between `CMAs` and tumor structures arises only from the growth and
-division of cells located outside the plate. The most important reason for this
-is that the cells in the internal structure of the tumor have limited access to
-oxygen. @Sulaiman2017 As a result, `CMA` is extremely useful in cancer research, but does not
-fully represent tumor cell structure. In the figure, the comparison of `PDX` and
-`Cell lines` were represented. @Sulaiman2017
-
-
-```{r pdx_vs_cma,fig.align="center", fig.height=15}
-knitr::include_graphics(c("The-main-differences-between-PDX-and-cell-line-xenografts-for-preclinical-research-In.png"))
-```
-
-* `PDX`, on the other hand, represents the tumor structure better than `CMAs`.
+* `PDX`, on the other hand, represents the tumor structure better than cell lines.
 So don't be surprised if you obtain different results on `PDX` data. `PDX`
 stands for `Patient-Derived Xenograft`. `PDX` is the re-creation of a tumor
 sample taken by biopsy from the patient by injecting it into mice. We use the
-`PDX` data to obtain more meaningful results clinically. In Figure 1 below you
+`PDX` data to obtain more meaningful results clinically. In Figure below you
 can see the overall representation for using `PDX` to test drug efficacy.
 @Jung2017 And the cell cultivation methodologies are represented in Figure 2.
 @Cho2016 @Ravi2016
@@ -256,8 +244,8 @@ knitr::include_graphics(c("PDX.png","cellculture.jpg"))
  
 ***
 
-* Cancer can be described as a disease of altered gene expression. There are
-many proteins that are turned on or off (gene activation or gene silencing) that
+* Cancer cells have altered gene expression. There are
+many genes that are abberantly turned on or off (gene activation or gene silencing) that
 dramatically alter the overall activity of the cell. A gene that is not normally
 expressed in that cell can be switched on and expressed at high levels.
 
@@ -266,9 +254,8 @@ expressed in that cell can be switched on and expressed at high levels.
 
 ***
 
-* `CNV` stands for **Copy Number of Variation**. A `CNV` is when the number of
-copies of a particular gene vary from one individual to the next. The extent to
-which copy number variation contributes to human disease is not yet known. It
+* `CNV` stands for **Copy Number of Variation**. A `CNV` occurs is when the number of
+copies of a particular gene or region vary from one individual to the next. It
 has long been recognized that some cancers are associated with elevated copy
 numbers of particular genes.For more information you can click the link
 [here.](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2697494/)
@@ -289,7 +276,7 @@ and `the GDSC` link is
 
 ***
 
-* `Drug response` data indicates the drug efficacy in cell lines. They are
+* `Drug response` data indicates the drug efficacy in cell lines and PDX. They are
 widely used in cancer research to prioritize drugs to be tested in patients.
 You'll notice the metric of the drug response is AUC. In pharmacology, the area
 under the plot of plasma concentration of a drug versus time after dosage
@@ -298,10 +285,12 @@ to a drug and its clearance rate from the body. AUC combines information about
 drug efficacy and potency into a single value, and it was reported to be the
 most robust metric previously. To learn more on response metrics click this
 [link](https://www.nature.com/articles/s41598-020-59656-2#:~:text=Having%20compared%20three%20drug%20response,most%20robust%20metric%20previously37.)
+For PDX dataset as well, AUC values are derived from tumor volume change. 
 
 ***
 
 ## 3. The Capstone Project: PART I Tasks
+This task is about using multi-omics data to predict drug response.
 
 Your tasks include:
 
@@ -343,15 +332,15 @@ solution.
 
 ***
 
-## 4. Summary of Data to be Used in Part I Tasks 
+### Summary of Data to be Used in Part I Tasks 
 
 Below some of the necessary summary statistics about the data you will use to
 complete tasks. A summary of drug response data is given at the end of the
 document.
 
-### The CCLE Data {.tabset}
+#### The CCLE Data {.tabset}
 
-#### Gene Expression Data from the CCLE
+##### Gene Expression Data from the CCLE
 
 The dimension of the gene expression data is **1305 x 18357**. There are also no
 missing values present within the dataset. Since the dimensions of the data was
@@ -380,7 +369,7 @@ table(is.na(CCLE_gex)) #FALSE:23954580
 #There are no missing values
 ```
 
-####  CNV Data from the CCLE
+#####  CNV Data from the CCLE
 
 There are no missing values present. Heatmap of the `CNV` data was plotted. The
 dimension of the CNV data is **1745 x 18356 **.
@@ -402,7 +391,7 @@ table(is.na(CCLE_cnv)) #FALSE:32031220
 #There are no missing values
 ```
 
-#### Mutation Data from the CCLE
+##### Mutation Data from the CCLE
 
 Below, the variant classification, top 10 mutated genes, variants per sample
 plots were plotted.
@@ -432,9 +421,9 @@ table(is.na(CCLE_mutdelim)) #FALSE: 43439347 , TRUE: 886853
 ```
 
 
-### The GDSC BROAD Data {.tabset}
+#### The GDSC BROAD Data {.tabset}
 
-#### Gene Expression Data from the GDSC BROAD
+##### Gene Expression Data from the GDSC BROAD
 
 A histogram and a  boxplot were plotted for representing distribution of the
 gene expression values of `the GDSC BROAD` dataset. There are no missing values
@@ -466,7 +455,7 @@ table(is.na(BROAD_gex)) #FALSE:11252228
 ```
 
 
-#### CNV Data from the GDSC BROAD
+##### CNV Data from the GDSC BROAD
 
 heatmap of the CNV data was plotted. There are no missing values present within
 the dataset.The dimensions of the CNV data is **891 x 18356**.
@@ -489,7 +478,7 @@ table(is.na(BROAD_cnv)) #FALSE:11252228
 #There are no missing values
 ```
 
-#### Mutation Data from the GDSC BROAD
+##### Mutation Data from the GDSC BROAD
 
 The frequency of each variant type and, top 10 mutated genes were plotted.
 
@@ -531,9 +520,9 @@ table(is.na(BROAD_mutdelim)) #FALSE: 22905359  , TRUE: 24115732
 ```
 
 
-###  The GDSC SANGER Data {.tabset}
+####  The GDSC SANGER Data {.tabset}
 
-#### Gene Expression Data from the GDSC SANGER
+##### Gene Expression Data from the GDSC SANGER
 
 A histogram and a boxplot were plotted to represent the expression values of the
 first fifty genes. There are no missing values present within the dataset. Check
@@ -563,7 +552,7 @@ table(is.na(SANGER_gex)) #FALSE:7048704
 #There are no missing values
 ```
 
-#### CNV Data from the GDSC SANGER
+##### CNV Data from the GDSC SANGER
 
 Heatmap of the CNV data was plotted. There are no missing values present within
 the dataset. The dimensions of the CNV data is **891 x 18356**.
@@ -585,7 +574,7 @@ table(is.na(SANGER_cnv)) #FALSE:16355196
 #There are no missing values
 ```
 
-#### Mutation Data from the GDSC SANGER
+##### Mutation Data from the GDSC SANGER
 
 The frequency of each variant type and, top 10 mutated genes were plotted.
 
@@ -629,9 +618,9 @@ table(is.na(SANGER_mutdelim)) #FALSE: 24111028   , TRUE: 24115732
 #There are missing values
 ```
 
-### The PDX Data {.tabset}
+#### The PDX Data {.tabset}
 
-#### Gene Expression Data from the PDX
+##### Gene Expression Data from the PDX
 
 There are no missing values present within the `PDX_all` data set. Check the
 distribution of gene expression. How does it differ from the distribution of
@@ -662,7 +651,7 @@ table(is.na(PDX_gex)) #FALSE:23954580
 #There are no missing values
 ```
 
-#### CNV Data from the PDX
+##### CNV Data from the PDX
 
 There are no missing values present. Heatmap of the CNV data was plotted. The
 dimension of the CNV data is **399 x 18356**.
@@ -685,7 +674,7 @@ table(is.na(PDX_cnv)) #FALSE:16355196
 #There are no missing values
 ```
 
-#### Mutation Data from the PDX
+##### Mutation Data from the PDX
 
 There are missing values present in the mutation data. The histogram of the
 mutation frequency values were plotted.
@@ -754,15 +743,15 @@ explanation.
 
 ***
 
-## 6. Summary of Data to be Used in Part II Tasks
+### Summary of Data to be Used in Part II Tasks
 
 Below are all the necessary summary statistics about the data you will use to
 complete tasks. A summary of drug response data is given at the end of the
 document.
 
-### The CCLE Data {.tabset}
+#### The CCLE Data {.tabset}
 
-#### CNV Data from the CCLE
+##### CNV Data from the CCLE
 
 There are no missing values present. Heatmap of the `CNV` data was plotted. The
 dimension of the CNV data is **1745 x 883 **.
@@ -784,7 +773,7 @@ table(is.na(CCLE_cnv_pan)) #FALSE:1540835
 #There are no missing values
 ```
 
-#### Mutation Data from the CCLE
+##### Mutation Data from the CCLE
 
 Below, the variant classification, top 10 mutated genes, variants per sample
 plots were plotted.
@@ -813,9 +802,9 @@ table(is.na(CCLE_mutdelim_pan)) #FALSE: 3719170 , TRUE: 77150
 #There are missing values
 ```
 
-### The GDSC BROAD Data {.tabset}
+#### The GDSC BROAD Data {.tabset}
 
-#### CNV Data from the GDSC BROAD
+##### CNV Data from the GDSC BROAD
 
 Heatmap of the CNV data was plotted. There are no missing values present within the dataset.The dimensions of the CNV data is **891 x 18356**.
 
@@ -838,7 +827,7 @@ table(is.na(BROAD_cnv_pan)) #FALSE:786753
 #There are no missing values
 ```
 
-#### Mutation Data from the GDSC BROAD
+##### Mutation Data from the GDSC BROAD
 
 The frequency of each variant type and, top 10 mutated genes were plotted.
 
@@ -880,9 +869,9 @@ table(is.na(BROAD_mutdelim_pan)) #FALSE: 2143308   , TRUE: 2256126
 #There are missing values
 ```
 
-### The GDSC SANGER Data {.tabset}
+#### The GDSC SANGER Data {.tabset}
 
-#### CNV Data from the GDSC SANGER
+##### CNV Data from the GDSC SANGER
 
 Heatmap of the CNV data was plotted. There are no missing values present within
 the dataset. The dimensions of the CNV data is **891 x 883**.
@@ -905,7 +894,7 @@ table(is.na(SANGER_cnv_pan)) #FALSE:786753
 #There are no missing values
 ```
 
-#### Mutation Data from the GDSC SANGER
+##### Mutation Data from the GDSC SANGER
 
 The frequency of each variant type and, top 10 mutated genes were plotted.
 
@@ -950,9 +939,9 @@ table(is.na(SANGER_mutdelim_pan)) #FALSE: 2143308 , TRUE: 2256126
 #There are missing values
 ```
 
-### The PDX Data {.tabset}
+#### The PDX Data {.tabset}
 
-#### CNV Data from the PDX
+##### CNV Data from the PDX
 
 There are no missing values present. Heatmap of the CNV data was plotted. The
 dimension of the CNV data is **399 x 883**.
@@ -975,7 +964,7 @@ table(is.na(PDX_cnv_pan)) #FALSE:352317
 #There are no missing values
 ```
 
-#### Mutation Data from the PDX
+##### Mutation Data from the PDX
 
 The histogram of the mutation frequency values were plotted.
 
