@@ -64,7 +64,7 @@ problems below in PDF format. **The report does not have to include the time con
 regarding model tuning etc.**. You can run those computational experiments outside the report 
 and simply include the best parameters in the report explaining in the text how you tuned the parameters. 
 
-In addition, you will need to fill a form on the results to be able
+In addition, you will need to fill a form about your results for us to be able
 to standardize the results we got. 
 
 ***
@@ -168,7 +168,7 @@ TRApcaplot <- ccle_data %>% filter(drug == "TRAMETINIB") %>%
 cowplot::plot_grid(ALPpcaplot,BUPpcaplot,CETpcaplot,ERLpcaplot,RIBpcaplot,TRApcaplot)
 ```
 
-* **NOTE : ** To use mutation data, you need to make it binary. However, you may
+* **NOTE : ** To use mutation data, you need to make it a binary matrix. However, you may
 have limited memory problems with using this function. We recommend you run the
 code and save the data as `.rds`, then read the `.rds` file in a new session.
 You can do it by following the code snippet below.
@@ -235,10 +235,10 @@ Cell lines are considered poor representations of
 actual tumors despite being widely utilized in research. 
 
 * `PDX`, on the other hand, represents the tumor structure better than cell lines.
-So don't be surprised if you obtain different results on `PDX` data. `PDX`
-stands for `Patient-Derived Xenograft`. `PDX` is the re-creation of a tumor
-sample taken by biopsy from the patient by xenografting into the mice and letting it grow there. We use the
-`PDX` data to obtain more meaningful results clinically. In Figure below you
+`PDX`stands for `Patient-Derived Xenograft`. `PDX` is the re-creation of a tumor
+sample taken by biopsy from the patient by xenografting into the mice and letting it grow there. 
+Since tumors grow in an organism, they are closer to real tumors and are more meaningful for
+pre-clinical studies. In Figure below you
 can see the overall representation for using `PDX` to test drug efficacy.
 @Jung2017 And the cell cultivation methodologies are represented in Figure 2.
 @Cho2016 @Ravi2016
@@ -282,7 +282,7 @@ numbers of particular genes.For more information you can click the link
 #### Mutation
 * A `mutation` is a change in the genome sequence compared to a reference. It may or may not result in abnormal proteins and/or changes in gene expression.
 Cancer is thought to develop due to mutations in key genes which start a cascade of molecular changes which results in a malignant cells, which multiply uncontrollably and could invade other tissues. We provide mutation data in an harmonized manner for all datasets. We recommend binarizing the mutation
-data before machine learning, one way to do this is provided below in the data summary sections. Other similar methods also exists here:  https://datatricks.co.uk/one-hot-encoding-in-r-three-simple-methods
+data before machine learning, one way to do this is provided above in the "Quick Start Section". Other similar methods also exists here:  https://datatricks.co.uk/one-hot-encoding-in-r-three-simple-methods
 
 ***
 
@@ -312,15 +312,15 @@ The sub-tasks are as follows:
 datasets. More complicated methods for batch effect correction is on Task 3 and don't belong in this task. 
 Just check if normalization, transformation and filtering is needed. And apply whatever you think is
 necessary. You should first look at normalization and filtering per omic data type. You then can choose to concatanate filtered and normalized
-single omic datasets into a multi-omics matrix prior to training. You can also experiment to see how different data processing techniques effects 
+single omic datasets into a multi-omics matrix prior to training. You can also experiment to see how different data processing techniques affects 
 accuracy. But those experiments do not belong in the final report, just include the final
 processing method and state if you did some experimentation to arrive at that method.
 
 1. Train machine learning models to predict drug response on each cell line dataset (GDSC_Sanger, GDSC_Broad, CCLE) using 10-fold cross-validation.
 You can use any machine learning model available to you in R and tune its performance. You would train a model for each drug and each cell line 
 dataset. For those best, performaing models, 
-make a table or heatmap (with values on the cells) for the CV R-squared values. 
-columns: GDSC_Sanger, GDSC_Broad, CCLE and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB   
+make a table or heatmap (with values printed on the cells) for the CV R-squared values. 
+columns: CCLE, GDSC_Broad, GDSC_Sanger and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB. Do not change this row/column order.   
 
 2. By now you have a tuned model for each drug and cell line dataset combination. What happens when you use a model trained on one cell line dataset on
 on the other two? For example, for a given drug say Cetuximab, apply the `CCLE`  model on `GDSC_Sanger` and `GDSC_Broad` datasets and record R-squared for those
@@ -333,7 +333,7 @@ predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearso
 * **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
 * **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. You don't have to use all the models in the ensemble, you can choose to remove a model if you believe it performs poorly. Anything is OK but not every approach will be performant. Use your imagination.
 
-* **IMPORTANT NOTE :** `the PDX data set` is for `validation`  **ONLY** and it
+* **IMPORTANT NOTE :** `the PDX data set` is for testing **ONLY** and it
 shouldn't be used for training the model or optimizing any training parameter including ensemble models.
 
 
@@ -344,9 +344,12 @@ shouldn't be used for training the model or optimizing any training parameter in
 
 ## TASK 2: Predict drug response using panel sequencing data.
 
-This task is about using panel sequencing data to predict drug response (CNVs and mutations for couple hundred to a thousand genes). The datasets to be used 
-are in `oncoKB_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders. In many clinical
-`PDX_all` should not be used for training, only for testing. The model parameters during training should not be optimized
+This task is about using panel sequencing data to predict drug response (CNVs and mutations for few hundred genes). 
+This kind of data is usually obtained as part of cancer diagnostics therefore more easily accesible for clinical samples.
+However, since the panel sequencing data measures limted set of features from a limited set of genes, it may not be the best
+choice for clinical variable modeling. 
+The datasets should be used for this task are in `oncoKB_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders. 
+`PDX_all` should not be used for training, only for test. The model parameters during training should not be optimized
 in anyway towards PDX prediction performance. This is **extremely important**.
 
 The sub-tasks are as follows:
@@ -354,15 +357,15 @@ The sub-tasks are as follows:
 0. Check if you need some sort of normalization, filtering and/or transformation. These methods have to be applied in all training and test
 datasets. More complicated methods for batch effect correction is on Task 3 and don't belong in this task. 
 Just check if normalization, transformation and filtering is needed. And apply whatever you think is
-necessary. You can also experiment to see how different data processing techniques effects 
+necessary. You can also experiment to see how different data processing techniques affects 
 accuracy. But those experiments do not belong in the final report, just include the final
 processing method and state if you did some experimentation to arrive at that method.
 
 1. Train machine learning models to predict drug response on each cell line dataset (GDSC_Sanger, GDSC_Broad, CCLE) using 10-fold cross-validation.
 You can use any machine learning model available to you in R and tune its performance. You would train a model for each drug and each cell line 
 dataset. For those best, performaing models, 
-make a table or heatmap (with values on the cells) for the CV R-squared values. 
-columns: GDSC_Sanger, GDSC_Broad, CCLE and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB   
+make a table or heatmap (with values printed on the cells) for the CV R-squared values. 
+columns: CCLE, GDSC_Broad, GDSC_Sanger and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB. Do not change this row/column order.   
 
 2. By now you have a tuned model for each drug and cell line dataset combination. What happens when you use a model trained on one cell line dataset on
 on the other two? For example, for a given drug say Cetuximab, apply the CCLE  model on GDSC_Sanger and GDSC_Broad datasets and record R-squared for those
@@ -375,10 +378,10 @@ predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearso
 * **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
 * **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. You don't have to use all the models in the ensemble, you can choose to remove a model if you believe it performs poorly. Anything is OK but not every approach will be performant. Use your imagination.
 
-* **IMPORTANT NOTE :** `the PDX data set` is for `validation`  **ONLY** and it
+* **IMPORTANT NOTE :** `the PDX data set` is for test  **ONLY** and it
 shouldn't be used for training the model or optimizing any training parameter including ensemble models.
 
-4. Compare the best performing models for PDX prediction from TASK 1 and TASK2. Make informative figures and briefly discuss (2-3 sentences) if multi-omics or panel sequencing is better for modeling response judging from PDX results. 
+4. Compare the best performing models for PDX prediction from TASK 1 and TASK2. Make informative figures and briefly discuss (2-3 sentences) if multi-omics or panel sequencing is better for modeling response judging from the PDX results. 
 
 
 ***
