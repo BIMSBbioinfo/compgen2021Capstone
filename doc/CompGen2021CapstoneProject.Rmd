@@ -402,22 +402,26 @@ Keeping these in mind, the sub-tasks are as follows:
 
 1. Apply batch-removal methods on **multi-omics datasets**  (TASK 1) including PDX. You can choose to work with a subset or only one
 of the cell line datasets but PDX dataset must be in there prior to batch effect removal.
-After removal of the effect, train drug response prediction on cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK1  or not.
-You can try multiple batch removal methods. If that's the case, report PDX performance for each of the methods. 
+After removal of the effect, train drug response prediction onlny on the cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK1  or not.
+You can try multiple batch removal methods. If that's the case, report the PDX prediction performance for each of the methods. 
+Make easy to undetstand & presentable plots.
 
 2. Apply batch-removal methods to **panel sequnecing datasets** (TASK 2) including PDX. You can choose to work with a subset or only one
 of the cell line datasets but PDX dataset must be in there prior to batch effect removal.
-After removal of the effect, train drug response prediction on cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK 2 or not.
-You can try multiple batch removal methods. If that's the case, report PDX performance for each of the methods. 
+After removal of the effect, train drug response prediction only on the cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK 2 or not.
+You can try multiple batch removal methods. If that's the case, report the PDX prediction performance for each of the methods.
+Make easy to undetstand & presentable plots.
 
 * **HINT :** Here are a few things to try for batch effect removal. You don't have to try these things, there are other methods but if you need a place to start these are possibly viable options.
-- use SVD, find eigenvectors associated with batch class, remove and reconstruct them.
+- use SVD, find eigenvectors associated with batch class, remove them and reconstruct data.
 - use linear regression to remove effects example: https://rdrr.io/github/LTLA/batchelor/man/rescaleBatches.html or https://rdrr.io/github/LTLA/batchelor/man/regressBatches.html
 - use single-cell RNA-seq methods that uses mutual-nearest neighbours to correct for batch effects: https://rdrr.io/github/LTLA/batchelor/man/fastMNN.html
 
 You might have problems applying these methods to binarized datasets such as mutation matrices. But you can try data transformations to make them work. 
-One easy trick to try on binary matrices is to set 0s to -1. Another one could be to try logistic regression residuals instead of linear regression residuals as
-`regressBatches` function does. You should probably try to use these methods in each omic data type seperately and construct corrected matrices for each of them.
+One easy trick to try on binary matrices is to set 0s to -1. Another one could be to try logistic regression residuals instead of linear regression residuals (
+`regressBatches` function uses linear regression residuals). You should probably try to use these methods in each omic data type seperately and construct 
+corrected matrices for each of them. There are methods that could work on multi-omics datasets to do matrix factorization, you can try them as well and use them 
+in an SVD-like manner as suggested above, ex: find latent factors associated with batch and remove them. 
 
 
 
