@@ -229,17 +229,18 @@ lines. You can get more info on `the GDSC` from
 **NOTE : **  Even though they might have overlapping cell lines,`GDSC_BROAD`
 and `CCLE` are different datasets.
 
-* The data within `The CCLE` and `The GDSC` datasets are based on cancer cell lines . Cancer cell lines are the tumor
-samples that are usually at point isolated from patients but since then grown in the lab environment.
-Cell lines are considered poor representations of
-actual tumors despite being widely utilized in research. 
+* The data within `The CCLE` and `The GDSC` datasets are based on cancer cell
+lines . Cancer cell lines are the tumor samples that are usually at point
+isolated from patients but since then grown in the lab environment. Cell lines
+are considered poor representations of actual tumors despite being widely
+utilized in research.
 
-* `PDX`, on the other hand, represents the tumor structure better than cell lines.
-`PDX`stands for `Patient-Derived Xenograft`. `PDX` is the re-creation of a tumor
-sample taken by biopsy from the patient by xenografting into the mice and letting it grow there. 
-Since tumors grow in an organism, they are closer to real tumors and are more meaningful for
-pre-clinical studies. In Figure below you
-can see the overall representation for using `PDX` to test drug efficacy.
+* `PDX`, on the other hand, represents the tumor structure better than cell
+lines. `PDX`stands for `Patient-Derived Xenograft`. `PDX` is the re-creation of
+a tumor sample taken by biopsy from the patient by xenografting into the mice
+and letting it grow there. Since tumors grow in an organism, they are closer to
+real tumors and are more meaningful for pre-clinical studies. In Figure below
+you can see the overall representation for using `PDX` to test drug efficacy.
 @Jung2017 And the cell cultivation methodologies are represented in Figure 2.
 @Cho2016 @Ravi2016
 
@@ -280,15 +281,21 @@ numbers of particular genes.For more information you can click the link
 ***
 
 #### Mutation
-* A `mutation` is a change in the genome sequence compared to a reference. It may or may not result in abnormal proteins and/or changes in gene expression.
-Cancer is thought to develop due to mutations in key genes which start a cascade of molecular changes which results in a malignant cells, which multiply uncontrollably and could invade other tissues. We provide mutation data in an harmonized manner for all datasets. We recommend binarizing the mutation
-data before machine learning, one way to do this is provided above in the "Quick Start Section". Other similar methods also exists here:  https://datatricks.co.uk/one-hot-encoding-in-r-three-simple-methods
+* A `mutation` is a change in the genome sequence compared to a reference. It
+may or may not result in abnormal proteins and/or changes in gene expression.
+Cancer is thought to develop due to mutations in key genes which start a cascade
+of molecular changes which results in a malignant cells, which multiply
+uncontrollably and could invade other tissues. We provide mutation data in an
+harmonized manner for all datasets. We recommend binarizing the mutation data
+before machine learning, one way to do this is provided above in the "Quick
+Start Section". Other similar methods also exists here:
+https://datatricks.co.uk/one-hot-encoding-in-r-three-simple-methods
 
 ***
 
 #### Drug response
-* `Drug response` data indicates the drug efficacy in cell lines and PDX. They are
-widely used in cancer research to prioritize drugs to be tested in patients.
+* `Drug response` data indicates the drug efficacy in cell lines and PDX. They
+are widely used in cancer research to prioritize drugs to be tested in patients.
 You'll notice the metric of the drug response is AUC. In pharmacology, the area
 under the plot of plasma concentration of a drug versus time after dosage
 (called “area under the curve” or AUC) gives insight into the extent of exposure
@@ -296,45 +303,78 @@ to a drug and its clearance rate from the body. AUC combines information about
 drug efficacy and potency into a single value, and it was reported to be the
 most robust metric previously. To learn more on response metrics click this
 [link](https://www.nature.com/articles/s41598-020-59656-2#:~:text=Having%20compared%20three%20drug%20response,most%20robust%20metric%20previously37.)
-WE provide AUC values for PDX dataset as well, however AUC values are derived from tumor volume change for PDX. It should be mentioned that the AUC does not measure the same things on the cell lines and PDX samples, and that the drug response distribution on PDX and Cell lines can be markedly different, even for same drugs. However, we expect/assume predictions on PDX using models trained on cell line AUCs should be correlated to PDX AUCs.
+We provide AUC values for PDX dataset as well, however AUC values are derived
+from tumor volume change for PDX. It should be mentioned that the AUC does not
+measure the same things on the cell lines and PDX samples, and that the drug
+response distribution on PDX and Cell lines can be markedly different, even for
+same drugs. However, we expect/assume predictions on PDX using models trained on
+cell line AUCs should be correlated to PDX AUCs.
 
 ***
 
 ## TASK 1: use multi-omics data to predict drug response
-This task is about using multi-omics data to predict drug response (gene expression, CNVs and mutations). The datasets to be used 
-are in `all_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders.
-`PDX_all` should not be used for training, only for testing. The model parameters during training should not be optimized
-in anyway towards PDX prediction performance. This is **extremely important**. You should use all omics dataset in training not just expression.
+
+This task is about using multi-omics data to predict drug response (gene
+expression, CNVs and mutations). The datasets to be used are in
+`all_intersect_genes` and `drug_response` folders in `GDSC_Broad`,
+`GDSC_Sanger`, `CCLE` and `PDX_all` folders. `PDX_all` should not be used for
+training, only for testing. The model parameters during training should not be
+optimized in anyway towards PDX prediction performance. This is **extremely
+important**. You should use all omics dataset in training not just expression.
 
 The sub-tasks are as follows:
 
-0. Check if you need some sort of normalization, filtering and/or transformation. These methods have to be applied in all training and test
-datasets. More complicated methods for batch effect correction is on Task 3 and don't belong in this task. 
-Just check if normalization, transformation and filtering is needed. And apply whatever you think is
-necessary. You should first look at normalization and filtering per omic data type. You then can choose to concatanate filtered and normalized
-single omic datasets into a multi-omics matrix prior to training. You can also experiment to see how different data processing techniques affects 
-accuracy. But those experiments do not belong in the final report, just include the final
-processing method and state if you did some experimentation to arrive at that method.
+0. Check if you need some sort of normalization, filtering and/or
+transformation. These methods have to be applied in all training and test
+datasets. More complicated methods for batch effect correction is on Task 3 and
+don't belong in this task. Just check if normalization, transformation and
+filtering is needed. And apply whatever you think is necessary. You should first
+look at normalization and filtering per omic data type. You then can choose to
+concatanate filtered and normalized single omic datasets into a multi-omics
+matrix prior to training. You can also experiment to see how different data
+processing techniques affects accuracy. But those experiments do not belong in
+the final report, just include the final processing method and state if you did
+some experimentation to arrive at that method.
 
-1. Train machine learning models to predict drug response on each cell line dataset (GDSC_Sanger, GDSC_Broad, CCLE) using 10-fold cross-validation.
-You can use any machine learning model available to you in R and tune its performance. You would train a model for each drug and each cell line 
-dataset. For those best, performaing models, 
-make a table or heatmap (with values printed on the cells) for the CV R-squared values. 
-columns: CCLE, GDSC_Broad, GDSC_Sanger and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB. Do not change this row/column order.   
+1. Train machine learning models to predict drug response on each cell line
+dataset (GDSC_Sanger, GDSC_Broad, CCLE) using 10-fold cross-validation. You can
+use any machine learning model available to you in R and tune its performance.
+You would train a model for each drug and each cell line dataset. For those
+best, performaing models, make a table or heatmap (with values printed on the
+cells) for the CV R-squared values. columns: CCLE, GDSC_Broad, GDSC_Sanger and
+rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB. Do
+not change this row/column order.
 
-2. By now you have a tuned model for each drug and cell line dataset combination. What happens when you use a model trained on one cell line dataset on
-on the other two? For example, for a given drug say Cetuximab, apply the `CCLE`  model on `GDSC_Sanger` and `GDSC_Broad` datasets and record R-squared for those
-predictions. Then, you can take the `GDSC_Broad` model and apply it on other two and record R-squared values. If you keep doing this, for each drug you will have six values for the R-squared measure. Output median and mean values as a table, and make boxplots for R-squared values of each drug as obtained above. Is there a dataset that results in poor models for many drugs? 
+2. By now you have a tuned model for each drug and cell line dataset
+combination. What happens when you use a model trained on one cell line dataset
+on on the other two? For example, for a given drug say Cetuximab, apply the
+`CCLE`  model on `GDSC_Sanger` and `GDSC_Broad` datasets and record R-squared
+for those predictions. Then, you can take the `GDSC_Broad` model and apply it on
+other two and record R-squared values. If you keep doing this, for each drug you
+will have six values for the R-squared measure. Output median and mean values as
+a table, and make boxplots for R-squared values of each drug as obtained above.
+Is there a dataset that results in poor models for many drugs?
 
-3. Take the best model from sub-task 1 and also the combine the models models in an ensemble learner ( this could be simply averaging their output) and
-predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson correlation and Spearman's Correlation) for observed vs predicted efficacy of each drug. Did the simple model perform better than the ensemble model?
+3. Take the best model from sub-task 1 and also the combine the models models in
+an ensemble learner ( this could be simply averaging their output) and predict
+drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson
+correlation and Spearman's Correlation) for observed vs predicted efficacy of
+each drug. Did the simple model perform better than the ensemble model?
 
 
-* **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
-* **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. You don't have to use all the models in the ensemble, you can choose to remove a model if you believe it performs poorly. Anything is OK but not every approach will be performant. Use your imagination.
+* **HINT :** How to decide the best model from step-1 for a given drug, this
+could be simply looking at CV R-squared values, or pick the model which has
+similar CV R-squared values to the out-of-sample R-squared values on the two
+other datasets. Anything reasonable is OK.
+* **HINT :** For the ensemble model, you can simply average output or re-train
+an ensembl model with cross-validation. You don't have to use all the models in
+the ensemble, you can choose to remove a model if you believe it performs
+poorly. Anything is OK but not every approach will be performant. Use your
+imagination.
 
 * **IMPORTANT NOTE :** `the PDX data set` is for testing **ONLY** and it
-shouldn't be used for training the model or optimizing any training parameter including ensemble models.
+shouldn't be used for training the model or optimizing any training parameter
+including ensemble models.
 
 
 
@@ -344,44 +384,72 @@ shouldn't be used for training the model or optimizing any training parameter in
 
 ## TASK 2: Predict drug response using panel sequencing data.
 
-This task is about using panel sequencing data to predict drug response (CNVs and mutations for few hundred genes). 
-This kind of data is usually obtained as part of cancer diagnostics therefore more easily accesible for clinical samples.
-However, since the panel sequencing data measures limted set of features from a limited set of genes, it may not be the best
-choice for clinical variable modeling. 
-The datasets should be used for this task are in `oncoKB_intersect_genes` and `drug_response` folders in `GDSC_Broad`, `GDSC_Sanger`, `CCLE` and `PDX_all` folders. 
-`PDX_all` should not be used for training, only for test. The model parameters during training should not be optimized
-in anyway towards PDX prediction performance. This is **extremely important**.
+This task is about using panel sequencing data to predict drug response (CNVs
+and mutations for few hundred genes). This kind of data is usually obtained as
+part of cancer diagnostics therefore more easily accesible for clinical samples.
+However, since the panel sequencing data measures limted set of features from a
+limited set of genes, it may not be the best choice for clinical variable
+modeling. The datasets should be used for this task are in
+`oncoKB_intersect_genes` and `drug_response` folders in `GDSC_Broad`,
+`GDSC_Sanger`, `CCLE` and `PDX_all` folders. `PDX_all` should not be used for
+training, only for test. The model parameters during training should not be
+optimized in anyway towards PDX prediction performance. This is **extremely
+important**.
 
 The sub-tasks are as follows:
 
-0. Check if you need some sort of normalization, filtering and/or transformation. These methods have to be applied in all training and test
-datasets. More complicated methods for batch effect correction is on Task 3 and don't belong in this task. 
-Just check if normalization, transformation and filtering is needed. And apply whatever you think is
-necessary. You can also experiment to see how different data processing techniques affects 
-accuracy. But those experiments do not belong in the final report, just include the final
-processing method and state if you did some experimentation to arrive at that method.
+0. Check if you need some sort of normalization, filtering and/or
+transformation. These methods have to be applied in all training and test
+datasets. More complicated methods for batch effect correction is on Task 3 and
+don't belong in this task. Just check if normalization, transformation and
+filtering is needed. And apply whatever you think is necessary. You can also
+experiment to see how different data processing techniques affects accuracy. But
+those experiments do not belong in the final report, just include the final
+processing method and state if you did some experimentation to arrive at that
+method.
 
-1. Train machine learning models to predict drug response on each cell line dataset (GDSC_Sanger, GDSC_Broad, CCLE) using 10-fold cross-validation.
-You can use any machine learning model available to you in R and tune its performance. You would train a model for each drug and each cell line 
-dataset. For those best, performaing models, 
-make a table or heatmap (with values printed on the cells) for the CV R-squared values. 
-columns: CCLE, GDSC_Broad, GDSC_Sanger and rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB. Do not change this row/column order.   
+1. Train machine learning models to predict drug response on each cell line
+dataset (GDSC_Sanger, GDSC_Broad, CCLE) using 10-fold cross-validation. You can
+use any machine learning model available to you in R and tune its performance.
+You would train a model for each drug and each cell line dataset. For those
+best, performaing models, make a table or heatmap (with values printed on the
+cells) for the CV R-squared values. columns: CCLE, GDSC_Broad, GDSC_Sanger and
+rows: ALPELISIB, BUPARLISIB, CETUXIMAB, ERLOTINIB, RIBOCICLIB, TRAMETINIB. Do
+not change this row/column order.
 
-2. By now you have a tuned model for each drug and cell line dataset combination. What happens when you use a model trained on one cell line dataset on
-on the other two? For example, for a given drug say Cetuximab, apply the CCLE  model on GDSC_Sanger and GDSC_Broad datasets and record R-squared for those
-predictions. Then, you can take the GDSC_Broad model and apply it on other two and record R-squared values. If you keep doing this, for each drug you will have six values for R-squared. Output median and mean values as a table, and make boxplots for R-squared values of each drug as obtained above.
+2. By now you have a tuned model for each drug and cell line dataset
+combination. What happens when you use a model trained on one cell line dataset
+on on the other two? For example, for a given drug say Cetuximab, apply the CCLE
+model on GDSC_Sanger and GDSC_Broad datasets and record R-squared for those
+predictions. Then, you can take the GDSC_Broad model and apply it on other two
+and record R-squared values. If you keep doing this, for each drug you will have
+six values for R-squared. Output median and mean values as a table, and make
+boxplots for R-squared values of each drug as obtained above.
 
-3. Take the best model from sub-task 1 and also the combine the models models in an ensemble learner ( this could be simply averaging their output) and
-predict drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson correlation and Spearman's Correlation) for observed vs predicted efficacy of each drug. Did the simple model perform better than ensemble model?
+3. Take the best model from sub-task 1 and also the combine the models models in
+an ensemble learner ( this could be simply averaging their output) and predict
+drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson
+correlation and Spearman's Correlation) for observed vs predicted efficacy of
+each drug. Did the simple model perform better than ensemble model?
 
 
-* **HINT :** How to decide the best model from step-1 for a given drug, this could be simply looking at CV R-squared values, or pick the model which has similar CV R-squared values to the out-of-sample R-squared values on the two other datasets. Anything reasonable is OK. 
-* **HINT :** For the ensemble model, you can simply average output or re-train an ensembl model with cross-validation. You don't have to use all the models in the ensemble, you can choose to remove a model if you believe it performs poorly. Anything is OK but not every approach will be performant. Use your imagination.
+* **HINT :** How to decide the best model from step-1 for a given drug, this
+could be simply looking at CV R-squared values, or pick the model which has
+similar CV R-squared values to the out-of-sample R-squared values on the two
+other datasets. Anything reasonable is OK.
+* **HINT :** For the ensemble model, you can simply average output or re-train
+an ensembl model with cross-validation. You don't have to use all the models in
+the ensemble, you can choose to remove a model if you believe it performs
+poorly. Anything is OK but not every approach will be performant. Use your
+imagination.
 
-* **IMPORTANT NOTE :** `the PDX data set` is for test  **ONLY** and it
-shouldn't be used for training the model or optimizing any training parameter including ensemble models.
+* **IMPORTANT NOTE :** `the PDX data set` is for test  **ONLY** and it shouldn't
+be used for training the model or optimizing any training parameter including
+ensemble models.
 
-4. Compare the best performing models for PDX prediction from TASK 1 and TASK2. Make informative figures and briefly discuss (2-3 sentences) if multi-omics or panel sequencing is better for modeling response judging from the PDX results. 
+4. Compare the best performing models for PDX prediction from TASK 1 and TASK2.
+Make informative figures and briefly discuss (2-3 sentences) if multi-omics or
+panel sequencing is better for modeling response judging from the PDX results.
 
 
 ***
@@ -389,39 +457,58 @@ shouldn't be used for training the model or optimizing any training parameter in
 
 
 ## TASK 3: Improving drug response predictions by transforming the data in a batch-aware manner.
-The PDX and the cell line datasets are biologically different. On top of this, technical differences
-due to data acquisition and processing exists. These differences might drive the patterns we observe
-more than the biology that is related to the drug response, and the differences create so-called "batches"
-of data where data points cluster by technical effects rather than patters of interesting biology.
-Ideally, we can try to remove these differences and train models on datasets where these differences are removed.
-In many cases, we may not be able to completely remove these effects or removing these effects could also
-remove interesting biological patterns. However, there is also potential to produce better models that could
-have higher performance on PDX models. 
+
+The PDX and the cell line datasets are biologically different. On top of this,
+technical differences due to data acquisition and processing exists. These
+differences might drive the patterns we observe more than the biology that is
+related to the drug response, and the differences create so-called "batches" of
+data where data points cluster by technical effects rather than patters of
+interesting biology. Ideally, we can try to remove these differences and train
+models on datasets where these differences are removed. In many cases, we may
+not be able to completely remove these effects or removing these effects could
+also remove interesting biological patterns. However, there is also potential to
+produce better models that could have higher performance on PDX models.
 
 Keeping these in mind, the sub-tasks are as follows:
 
-1. Apply batch-removal methods on **multi-omics datasets**  (TASK 1) including PDX. You can choose to work with a subset or only one
-of the cell line datasets but PDX dataset must be in there prior to batch effect removal.
-After removal of the effect, train drug response prediction onlny on the cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK1  or not.
-You can try multiple batch removal methods. If that's the case, report the PDX prediction performance for each of the methods. 
-Make easy to undetstand & presentable plots.
+1. Apply batch-removal methods on **multi-omics datasets**  (TASK 1) including
+PDX. You can choose to work with a subset or only one of the cell line datasets
+but PDX dataset must be in there prior to batch effect removal. After removal of
+the effect, train drug response prediction onlny on the cell line dataset(s) and
+predict on PDX. Report if R-squared improved over TASK1  or not. You can try
+multiple batch removal methods. If that's the case, report the PDX prediction
+performance for each of the methods. Make easy to undetstand & presentable
+plots.
 
-2. Apply batch-removal methods to **panel sequnecing datasets** (TASK 2) including PDX. You can choose to work with a subset or only one
-of the cell line datasets but PDX dataset must be in there prior to batch effect removal.
-After removal of the effect, train drug response prediction only on the cell line dataset(s) and predict on PDX. Report if R-squared improved over TASK 2 or not.
-You can try multiple batch removal methods. If that's the case, report the PDX prediction performance for each of the methods.
-Make easy to undetstand & presentable plots.
+2. Apply batch-removal methods to **panel sequnecing datasets** (TASK 2)
+including PDX. You can choose to work with a subset or only one of the cell line
+datasets but PDX dataset must be in there prior to batch effect removal. After
+removal of the effect, train drug response prediction only on the cell line
+dataset(s) and predict on PDX. Report if R-squared improved over TASK 2 or not.
+You can try multiple batch removal methods. If that's the case, report the PDX
+prediction performance for each of the methods. Make easy to undetstand &
+presentable plots.
 
-* **HINT :** Here are a few things to try for batch effect removal. You don't have to try these things, there are other methods but if you need a place to start these are possibly viable options.
-- use SVD, find eigenvectors associated with batch class, remove them and reconstruct data.
-- use linear regression to remove effects example: https://rdrr.io/github/LTLA/batchelor/man/rescaleBatches.html or https://rdrr.io/github/LTLA/batchelor/man/regressBatches.html
-- use single-cell RNA-seq methods that uses mutual-nearest neighbours to correct for batch effects: https://rdrr.io/github/LTLA/batchelor/man/fastMNN.html
+* **HINT :** Here are a few things to try for batch effect removal. You don't
+have to try these things, there are other methods but if you need a place to
+start these are possibly viable options. - use SVD, find eigenvectors associated
+with batch class, remove them and reconstruct data. - use linear regression to
+remove effects example:
+https://rdrr.io/github/LTLA/batchelor/man/rescaleBatches.html or
+https://rdrr.io/github/LTLA/batchelor/man/regressBatches.html - use single-cell
+RNA-seq methods that uses mutual-nearest neighbours to correct for batch
+effects: https://rdrr.io/github/LTLA/batchelor/man/fastMNN.html
 
-You might have problems applying these methods to binarized datasets such as mutation matrices. But you can try data transformations to make them work. 
-One easy trick to try on binary matrices is to set 0s to -1. Another one could be to try logistic regression residuals instead of linear regression residuals (
-`regressBatches` function uses linear regression residuals). You should probably try to use these methods in each omic data type seperately and construct 
-corrected matrices for each of them. There are methods that could work on multi-omics datasets to do matrix factorization, you can try them as well and use them 
-in an SVD-like manner as suggested above, ex: find latent factors associated with batch and remove them. 
+You might have problems applying these methods to binarized datasets such as
+mutation matrices. But you can try data transformations to make them work. One
+easy trick to try on binary matrices is to set 0s to -1. Another one could be to
+try logistic regression residuals instead of linear regression residuals (
+`regressBatches` function uses linear regression residuals). You should probably
+try to use these methods in each omic data type seperately and construct
+corrected matrices for each of them. There are methods that could work on
+multi-omics datasets to do matrix factorization, you can try them as well and
+use them in an SVD-like manner as suggested above, ex: find latent factors
+associated with batch and remove them.
 
 
 
