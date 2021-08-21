@@ -53,9 +53,10 @@ interesting visualization and/or data processing/correction methods that might e
 
 The main aim of the tasks is
 to predict the response of 6 oncology drugs on different disease models. There are 3 main tasks as follows:
-- TASK 1: Predict drug response from multi-omics data
-- TASK 2: Predict drug response from panel sequencing data
-- TASK 3: Improving drug response predictions by transforming data in a batch-aware manner.
+
+  - TASK 1: Predict drug response from multi-omics data
+  - TASK 2: Predict drug response from panel sequencing data
+  - TASK 3: Improving drug response predictions by transforming data in a batch-aware manner.
 
 
 The following page contains the tasks and all of the necessary information to
