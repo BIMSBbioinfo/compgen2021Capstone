@@ -491,11 +491,15 @@ presentable plots.
 
 * **HINT :** Here are a few things to try for batch effect removal. You don't
 have to try these things, there are other methods but if you need a place to
-start these are possibly viable options. - use SVD, find eigenvectors associated
-with batch class, remove them and reconstruct data. - use linear regression to
+start these are possibly viable options. 
+
+- use SVD, find eigenvectors associated
+with batch class, remove them and reconstruct data. 
+- use linear regression to
 remove effects example:
 https://rdrr.io/github/LTLA/batchelor/man/rescaleBatches.html or
-https://rdrr.io/github/LTLA/batchelor/man/regressBatches.html - use single-cell
+https://rdrr.io/github/LTLA/batchelor/man/regressBatches.html 
+- use single-cell
 RNA-seq methods that uses mutual-nearest neighbours to correct for batch
 effects: https://rdrr.io/github/LTLA/batchelor/man/fastMNN.html
 
