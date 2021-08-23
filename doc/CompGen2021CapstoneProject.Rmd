@@ -313,7 +313,7 @@ cell line AUCs should be correlated to PDX AUCs.
 
 ***
 
-## TASK 1: use multi-omics data to predict drug response
+## TASK 1: Use Multi-Omics Data to Predict Drug Response
 
 This task is about using multi-omics data to predict drug response (gene
 expression, CNVs and mutations). The datasets to be used are in
@@ -356,7 +356,7 @@ will have six values for the R-squared measure. Output median and mean values as
 a table, and make boxplots for R-squared values of each drug as obtained above.
 Is there a dataset that results in poor models for many drugs?
 
-3. Take the best model from sub-task 1 and also the combine the models in
+3. Take the best model from sub-task 1 and also the combine the models models in
 an ensemble learner ( this could be simply averaging their output) and predict
 drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson
 correlation and Spearman's Correlation) for observed vs predicted efficacy of
@@ -383,7 +383,7 @@ including ensemble models.
 
 
 
-## TASK 2: Predict drug response using panel sequencing data.
+## TASK 2: Predict Drug Response Using Panel Sequencing Data.
 
 This task is about using panel sequencing data to predict drug response (CNVs
 and mutations for few hundred genes). This kind of data is usually obtained as
@@ -427,7 +427,7 @@ and record R-squared values. If you keep doing this, for each drug you will have
 six values for R-squared. Output median and mean values as a table, and make
 boxplots for R-squared values of each drug as obtained above.
 
-3. Take the best model from sub-task 1 and also the combine the models in
+3. Take the best model from sub-task 1 and also the combine the models models in
 an ensemble learner ( this could be simply averaging their output) and predict
 drug response on `the PDX data set`. Plot the metrics (R-squared, Pearson
 correlation and Spearman's Correlation) for observed vs predicted efficacy of
@@ -457,10 +457,10 @@ panel sequencing is better for modeling response judging from the PDX results.
 
 
 
-## TASK 3: Improving drug response predictions by transforming the data in a batch-aware manner.
+## TASK 3: Improving Drug Response Predictions by Transforming the Data in a Batch-Aware Manner.
 
 The PDX and the cell line datasets are biologically different. On top of this,
-technical differences due to data acquisition and processing exist. These
+technical differences due to data acquisition and processing exists. These
 differences might drive the patterns we observe more than the biology that is
 related to the drug response, and the differences create so-called "batches" of
 data where data points cluster by technical effects rather than patters of
@@ -493,16 +493,13 @@ presentable plots.
 * **HINT :** Here are a few things to try for batch effect removal. You don't
 have to try these things, there are other methods but if you need a place to
 start these are possibly viable options. 
-
-- use SVD, find eigenvectors associated
-with batch class, remove them and reconstruct data. 
-- use linear regression to
-remove effects example:
+    - use SVD, find eigenvectors associated with batch class, remove them and
+reconstruct data.
+    - use linear regression to remove effects example:
 https://rdrr.io/github/LTLA/batchelor/man/rescaleBatches.html or
 https://rdrr.io/github/LTLA/batchelor/man/regressBatches.html 
-- use single-cell
-RNA-seq methods that uses mutual-nearest neighbours to correct for batch
-effects: https://rdrr.io/github/LTLA/batchelor/man/fastMNN.html
+    - use single-cell RNA-seq methods that uses mutual-nearest neighbours to correct
+for batch effects: https://rdrr.io/github/LTLA/batchelor/man/fastMNN.html
 
 You might have problems applying these methods to binarized datasets such as
 mutation matrices. But you can try data transformations to make them work. One
